@@ -1,0 +1,359 @@
+/* Reset */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: "Segoe UI", sans-serif;
+}
+
+body{
+background:#f4f7ff;
+color:#1b2b52;
+}
+
+
+/* Layout */
+
+.layout{
+display:flex;
+min-height:100vh;
+}
+
+.main{
+flex:1;
+padding:30px;
+}
+
+
+/* Sidebar */
+
+.sidebar{
+width:230px;
+background:#0a2a66;
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+padding:25px;
+}
+
+.logo{
+text-align:center;
+margin-bottom:40px;
+font-weight:600;
+}
+
+.sidebar nav{
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.sidebar button{
+padding:12px;
+border:none;
+border-radius:8px;
+background:white;
+color:#0a2a66;
+font-weight:600;
+cursor:pointer;
+transition:0.2s;
+}
+
+.sidebar button:hover{
+background:#2f6bff;
+color:white;
+}
+
+.logout{
+margin-top:30px;
+background:#ff4d4d !important;
+color:white !important;
+}
+
+
+/* Header */
+
+.header{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+margin-bottom:25px;
+}
+
+.profile{
+display:flex;
+align-items:center;
+gap:20px;
+}
+
+.avatar{
+width:70px;
+height:70px;
+border-radius:50%;
+background:#dbe5ff;
+}
+
+
+/* Room Grid */
+
+.rooms{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+gap:20px;
+}
+
+.room-card{
+background:white;
+border-radius:10px;
+padding:35px;
+text-align:center;
+font-weight:600;
+cursor:pointer;
+box-shadow:0 5px 12px rgba(0,0,0,0.08);
+transition:0.2s;
+}
+
+.room-card:hover{
+background:#2f6bff;
+color:white;
+transform:translateY(-4px);
+}
+
+
+/* Responsive */
+
+@media(max-width:900px){
+
+.sidebar{
+display:none;
+}
+
+.main{
+padding:15px;
+}
+
+.rooms{
+grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+
+/* Attendance Page */
+
+.attendance-container{
+
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+}
+
+.attendance-header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+
+}
+
+.date-box{
+
+display:flex;
+align-items:center;
+gap:10px;
+
+}
+
+.date-box input{
+
+padding:6px 10px;
+border-radius:6px;
+border:1px solid #ccc;
+
+}
+
+/* table */
+
+.attendance-table{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+.attendance-table th{
+
+background:#e8efff;
+padding:12px;
+
+}
+
+.attendance-table td{
+
+padding:12px;
+text-align:center;
+border-bottom:1px solid #eee;
+
+}
+
+.attendance-table td:first-child{
+
+text-align:left;
+font-weight:500;
+
+}
+
+
+/* buttons */
+
+.present{
+
+background:#2ecc71;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+.absent{
+
+background:#ff4d4d;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+.messcut-on{
+
+background:#ff7a00;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+.messcut-off{
+
+background:#d1d5db;
+border:none;
+padding:8px 14px;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+
+/* mobile */
+
+@media(max-width:700px){
+
+.attendance-header{
+
+flex-direction:column;
+align-items:flex-start;
+gap:10px;
+
+}
+
+.attendance-table{
+
+font-size:14px;
+
+}
+
+}
+
+
+/* EXPENSES PAGE */
+
+.expenses-container{
+
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+
+}
+
+.expense-form{
+
+display:flex;
+gap:10px;
+margin-bottom:20px;
+flex-wrap:wrap;
+
+}
+
+.expense-form input,
+.expense-form select{
+
+padding:8px;
+border:1px solid #ccc;
+border-radius:6px;
+
+}
+
+.expense-form button{
+
+background:#2f6bff;
+color:white;
+border:none;
+padding:8px 15px;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+.expense-table{
+
+width:100%;
+border-collapse:collapse;
+
+}
+
+.expense-table th{
+
+background:#e8efff;
+padding:10px;
+
+}
+
+.expense-table td{
+
+padding:10px;
+border-bottom:1px solid #eee;
+text-align:center;
+
+}
+
+.delete-btn{
+
+background:#ff4d4d;
+color:white;
+border:none;
+padding:5px 10px;
+border-radius:5px;
+cursor:pointer;
+
+}
+
+.expense-total{
+
+margin-top:15px;
+font-weight:bold;
+font-size:18px;
+
+}
