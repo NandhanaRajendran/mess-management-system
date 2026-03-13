@@ -22,7 +22,7 @@ export default function Expenses() {
 
   const fetchExpenses = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/expenses');
+      const response = await fetch('https://mess-management-system-q6us.onrender.com/api/expenses');
       if (!response.ok) throw new Error("Failed to fetch expenses");
       const data = await response.json();
       setExpenses(data);
@@ -44,7 +44,7 @@ export default function Expenses() {
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/expenses', {
+      const response = await fetch('https://mess-management-system-q6us.onrender.com/api/expenses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export default function Expenses() {
 
   async function deleteExpense(id) {
     try {
-      const response = await fetch(`http://localhost:5000/api/expenses/${id}`, {
+      const response = await fetch(`https://mess-management-system-q6us.onrender.com/api/expenses/${id}`, {
         method: 'DELETE'
       });
 

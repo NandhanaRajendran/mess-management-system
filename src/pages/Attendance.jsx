@@ -14,7 +14,7 @@ export default function Attendance() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/students/room/${roomId}`);
+        const response = await fetch(`https://mess-management-system-q6us.onrender.com/api/students/room/${roomId}`);
         if (!response.ok) {
           throw new Error("Failed to fetch students");
         }
@@ -38,7 +38,7 @@ export default function Attendance() {
 
   async function updateStudentAction(id, updateData) {
     try {
-      const response = await fetch(`http://localhost:5000/api/students/${id}`, {
+      const response = await fetch(`https://mess-management-system-q6us.onrender.com/api/students/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updateData),
