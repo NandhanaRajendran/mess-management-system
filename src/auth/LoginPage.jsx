@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import "../styles/login.css";
 export default function LoginPage() {
 
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   function handleLogin(e) {
     e.preventDefault();
@@ -27,45 +28,42 @@ export default function LoginPage() {
     }
 
     else {
-      alert("Invalid username or password");
+      setError("Invalid username or password");
     }
   }
 
   return (
-    <div className="login-wrapper">
-      <div className="login-card">
+    <div className="login">
+        <div className="circle c1"></div>
+        <div className="circle c2"></div>
+        <div className="circle c3"></div>
+        <div className="circle c4"></div>
+        <div className="circle c5"></div>
+      <div className="box">
+            <div className="logo">
+          <h1  className="heading">🎓 UNIPAY </h1>
+            </div>
+  
 
-        <h2>Mess Management System</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          onChange={(e) => setUsername(e.target.value)}
+        />
+    
 
-        <form onSubmit={handleLogin}>
+        <input
+          type="password"
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
 
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        <button className="btnFeatures" onClick={handleLogin}>
+          Login
+        </button>
 
-          <button type="submit">Login</button>
-
-        </form>
-
-        <p
-          className="forgot-link"
-          onClick={() => navigate("/forgot-password")}
-        >
-          Forgot Password?
-        </p>
-
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </div>
     </div>
   );
