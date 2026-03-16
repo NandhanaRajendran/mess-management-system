@@ -30,6 +30,12 @@ import InmateEnroll from "./roles/hostel/inmateEnrollment";
 import ViewHdf from "./roles/hostel/ViewHdf";
 import ViewRent from "./roles/hostel/ViewRent";
 
+import Hod from "./roles/hod/HodDashboard";
+import Student from "./roles/student/StudentDashboard";
+import Pta from "./roles/pta/PTADashboard";
+import Staffadvisor from "./roles/staffAdvisor/StaffAdvisorDashboard";
+
+
 function App() {
   return (
     <Router>
@@ -49,6 +55,11 @@ function App() {
         <Route path="/hostel/enroll" element= {<InmateEnroll/>}/>
         <Route path="/hostel/viewrent" element = {<ViewRent/>}/>
         <Route path="/hostel/viewhdf" element = {<ViewHdf/>}/>
+        <Route path="/hod/dashboard" element = {<Hod/>}/>
+        <Route path="/student/dashboard" element = {<Student/>}/>
+
+        <Route path="/pta/dashboard" element = {<Pta/>} />
+        <Route path="staffadvisor/dashboard" element = {<Staffadvisor/>}/>
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />

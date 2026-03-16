@@ -1,0 +1,64 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&display=swap');
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Plus Jakarta Sans', sans-serif;
+  background:linear-gradient(135deg,#e8f4fd 0%,#f0f9ff 40%,#e0f2fe 100%);
+  min-height:100vh;
+}
+
+select option{
+  font-family:'Plus Jakarta Sans', sans-serif;
+}
+
+/* Responsive helpers */
+
+@media(max-width:640px){
+  .stat-grid-resp{
+    grid-template-columns:repeat(2,1fr)!important;
+  }
+
+  .due-sum-resp{
+    grid-template-columns:repeat(2,1fr)!important;
+  }
+}
+
+/* Dashboard */
+
+.dashboard-container{
+  max-width:1200px;
+  margin:auto;
+  padding:28px 24px;
+}
+
+.page-title{
+  font-family:'Sora', sans-serif;
+  font-size:1.8rem;
+  font-weight:700;
+}
+
+.page-subtitle{
+  font-size:.9rem;
+  color:#64748b;
+}
+
+/* Navbar */
+
+.navbar{
+  background:white;
+  border-bottom:1px solid #bae6fd;
+  height:60px;
+  padding:0 24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:100;
+}

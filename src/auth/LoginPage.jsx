@@ -38,8 +38,23 @@ export default function LoginPage() {
     }
 
     else if (username === "hostel" && password === "1234") {
-      localStorage.setItem("role", "role");
+      localStorage.setItem("role", "hostel");
       navigate("/hostel/dashboard");
+    }
+
+    else if (username === "hod" && password === "1234") {
+      localStorage.setItem("role", "hod");
+      navigate("/hod/dashboard");
+    }
+
+    else if (username === "staffadvisor" && password === "1234") {
+      localStorage.setItem("role", "staffadvisor");
+      navigate("/staffadvisor/dashboard");
+    }
+
+    else if (username === "pta" && password === "1234") {
+      localStorage.setItem("role", "pta");
+      navigate("/pta/dashboard");
     }
 
     else {
