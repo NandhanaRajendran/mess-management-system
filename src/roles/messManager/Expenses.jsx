@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "../../components/Layout";
 
 export default function Expenses() {
   const today = new Date().toISOString().split("T")[0];
   const currentMonth = new Date().toISOString().slice(0, 7);
 
+  const fileInputRef = useRef();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,7 +45,10 @@ export default function Expenses() {
 
   // ✅ ADD EXPENSE (FIXED)
   async function addExpense() {
-    if (!title || !amount) return;
+    if (!title || !amount || !bill) {
+      alert("Please fill all fields and upload bill");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("title", title);
@@ -79,6 +83,7 @@ export default function Expenses() {
       setBill(null);
       setIsCommon(false);
       setQuantity("");
+      fileInputRef.current.value = "";
     } catch (err) {
       console.error(err);
       alert("Error adding expense");
@@ -160,7 +165,9 @@ export default function Expenses() {
           {/* ✅ FILE UPLOAD */}
           <input
             type="file"
+            ref={fileInputRef}
             accept="image/*,application/pdf"
+            required
             onChange={(e) => setBill(e.target.files[0])}
           />
 
