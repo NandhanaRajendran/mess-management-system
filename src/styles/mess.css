@@ -1,12 +1,46 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
 /* SIDEBAR */
 
+/* ── GLOBAL SCROLLBAR ─────────────────────────────────────── */
+html, body, .main {
+  scrollbar-width: thin;
+  scrollbar-color: #c7d2fe #f0f9ff;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.main::-webkit-scrollbar {
+  width: 6px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.main::-webkit-scrollbar-track {
+  background: #f0f9ff;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.main::-webkit-scrollbar-thumb {
+  background: #c7d2fe;
+  border-radius: 99px;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.main::-webkit-scrollbar-thumb:hover {
+  background: #818cf8;
+}
+
 .layout {
   background: linear-gradient(135deg, #7bc5f7 0%, #f0f9ff 40%, #7bc5f7 100%);
 }
+.main {
+  margin-left: 230px; /* offset for fixed sidebar */
+  min-height: 100vh;
+}
 .page-content {
   padding: 3%;
-  margin-left: 230px; /* offset for fixed sidebar */
 }
 .sidebar {
   width: 230px;
@@ -354,7 +388,7 @@
 .top-controls select {
   border: none;
   outline: none;
-  padding: 2px 0;
+  padding: 2px 4px;
   font-size: 14px;
   font-weight: 600;
   color: #0f172a;
@@ -362,6 +396,7 @@
   cursor: pointer;
   appearance: auto;
   min-width: 0;
+  width: 100%;
 }
 
 /* CARD */
@@ -862,7 +897,7 @@
     z-index: 1000;
   }
 
-  .page-content {
+  .main {
     margin-left: 0; /* no offset on mobile */
   }
 

@@ -315,8 +315,7 @@ export default function MessBill() {
         <div>+ Prev: ₹{Number(balance.prevBalance || 0).toFixed(2)}</div>
         <div>− Closing: ₹{Number(balance.closingBalance || 0).toFixed(2)}</div>
         <div>Attendance: {totalAttendance} days</div>
-        <div>Food Rate/Day: ₹{foodRatePerDay.toFixed(2)}</div>
-        <div>Staff/Student: ₹{staffRatePerStudent.toFixed(2)}</div>
+        
         
       </div>
     </Layout>
