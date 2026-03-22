@@ -1,128 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../styles/principle.css";
 import { useNavigate } from "react-router-dom";
 
 const PrincipalDashboard = () => {
 
-  const students = [
-    {
-      admission: "STU2024001",
-      name: "John Doe",
-      department: "CSE",
-      semester: "1",
-      PTA: 0,
-      Bus: 12000,
-      HostelRent: 0,
-      HDF: 0,
-      Mess: 5000,
-      Library: 0,
-      Lab: 0,
-      CDF: 0,
-      Accreditation: 0
-    },
-    {
-      admission: "STU2024002",
-      name: "Jane Smith",
-      department: "ECE",
-      semester: "2",
-      PTA: 2000,
-      Bus: 0,
-      HostelRent: 15000,
-      HDF: 3000,
-      Mess: 0,
-      Library: 500,
-      Lab: 0,
-      CDF: 0,
-      Accreditation: 0
-    },
-    {
-      admission: "STU2024003",
-      name: "Mike Johnson",
-      department: "ME",
-      semester: "3",
-      PTA: 0,
-      Bus: 0,
-      HostelRent: 0,
-      HDF: 0,
-      Mess: 0,
-      Library: 0,
-      Lab: 2000,
-      CDF: 0,
-      Accreditation: 0
-    },
-    {
-      admission: "STU2024004",
-      name: "Sarah Williams",
-      department: "CSE",
-      semester: "4",
-      PTA: 2000,
-      Bus: 12000,
-      HostelRent: 0,
-      HDF: 0,
-      Mess: 0,
-      Library: 1200,
-      Lab: 1500,
-      CDF: 0,
-      Accreditation: 0
-    },
-    {
-      admission: "STU2024005",
-      name: "David Brown",
-      department: "ECE",
-      semester: "5",
-      PTA: 0,
-      Bus: 12000,
-      HostelRent: 15000,
-      HDF: 3000,
-      Mess: 5000,
-      Library: 0,
-      Lab: 0,
-      CDF: 1000,
-      Accreditation: 1000
-    },
-    {
-      admission: "STU2024006",
-      name: "Emma Wilson",
-      department: "ME",
-      semester: "6",
-      PTA: 2000,
-      Bus: 0,
-      HostelRent: 0,
-      HDF: 0,
-      Mess: 0,
-      Library: 0,
-      Lab: 0,
-      CDF: 500,
-      Accreditation: 500
-    },
-    {
-      admission: "STU2024007",
-      name: "Daniel Thomas",
-      department: "CSE",
-      semester: "7",
-      PTA: 0,
-      Bus: 0,
-      HostelRent: 15000,
-      HDF: 3000,
-      Mess: 5000,
-      Library: 0,
-      Lab: 0,
-      CDF: 1000,
-      Accreditation: 1000
-    }
-  ];
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("");
-  const [semester, setSemester] = useState("");
-
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:8000/api/principal/students");
+        if (!response.ok) {
+          throw new Error("Failed to fetch students");
+        }
+        const data = await response.json();
+        setStudents(data);
+      } catch (error) {
+        console.error("Error fetching principal dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, []);
 
   const filteredStudents = students.filter((student) => {
     return (
-      student.admission.toLowerCase().includes(search.toLowerCase()) &&
-      student.department.toLowerCase().includes(dept.toLowerCase()) &&
-      student.semester.toLowerCase().includes(semester.toLowerCase())
+      (student.admission?.toLowerCase() || "").includes(search.toLowerCase()) &&
+      (student.department?.toLowerCase() || "").includes(dept.toLowerCase())
     );
   });
 
@@ -133,19 +44,20 @@ const PrincipalDashboard = () => {
 
   const calculateTotal = (student) => {
     return (
-      student.PTA +
-      student.Bus +
-      student.HostelRent +
-      student.HDF +
-      student.Mess +
-      student.Library +
-      student.Lab +
-      student.CDF +
-      student.Accreditation
+      (student.PTA || 0) +
+      (student.Bus || 0) +
+      (student.HostelRent || 0) +
+      (student.HDF || 0) +
+      (student.Mess || 0) +
+      (student.Library || 0) +
+      (student.Lab || 0) +
+      (student.CDF || 0) +
+      (student.Accreditation || 0)
     );
   };
 
   const handleLogout = () => {
+    sessionStorage.removeItem("user");
     navigate("/");
   };
 
@@ -197,6 +109,7 @@ const PrincipalDashboard = () => {
             <option value="Robotics">Robotics</option>
           </select>
 
+<<<<<<< HEAD
           <select
             value={semester}
             onChange={(e) => setSemester(e.target.value)}
@@ -212,6 +125,8 @@ const PrincipalDashboard = () => {
             <option value="8">S8</option>
           </select>
 
+=======
+>>>>>>> 050060904fd34fd0ee851169c3174498aeaaf6ea
         </div>
 
         {/* TABLE */}
@@ -223,7 +138,6 @@ const PrincipalDashboard = () => {
                 <th>Admission No</th>
                 <th>Name</th>
                 <th>Dept</th>
-                <th>Semester</th>
                 <th>PTA</th>
                 <th>Bus</th>
                 <th>Hostel Rent</th>
@@ -239,7 +153,7 @@ const PrincipalDashboard = () => {
 
             <tbody>
 
-              {filteredStudents.map((student, index) => {
+              {filteredStudents.length > 0 ? filteredStudents.map((student, index) => {
 
                 const total = calculateTotal(student);
 
@@ -249,7 +163,6 @@ const PrincipalDashboard = () => {
                     <td>{student.admission}</td>
                     <td>{student.name}</td>
                     <td>{student.department}</td>
-                    <td>Sem {student.semester}</td>
 
                     <td>{renderCell(student.PTA)}</td>
                     <td>{renderCell(student.Bus)}</td>
@@ -267,7 +180,13 @@ const PrincipalDashboard = () => {
 
                   </tr>
                 );
-              })}
+              }) : (
+                 <tr>
+                    <td colSpan="13" style={{ textAlign: "center", padding: "2rem" }}>
+                      {loading ? "Loading dues..." : "No dues found"}
+                    </td>
+                 </tr>
+              )}
 
             </tbody>
 
