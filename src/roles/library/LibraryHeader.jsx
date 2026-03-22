@@ -5,7 +5,7 @@ export default function LibraryHeader({ toggleMenu }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("role");
+    sessionStorage.removeItem("role");
     navigate("/login");
   };
 

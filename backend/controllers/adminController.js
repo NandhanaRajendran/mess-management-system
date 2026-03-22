@@ -497,20 +497,25 @@ exports.getAdvisorDues = async (req, res) => {
 exports.getHodDues = async (req, res) => {
   try {
     const dept = await Department.findOne({ hod: req.user.refId });
-
-    if (!dept) {
-      return res.status(404).json({ message: "Department not found" });
-    }
+    if (!dept) return res.status(404).json({ message: "Department not found" });
 
     const students = await Student.find({ department: dept._id });
+    const ownIds = students.map((s) => s._id);
 
-    const ids = students.map((s) => s._id);
+    // get HOD Fine fee section
+    const hodFeeSection = await FeeSection.findOne({ name: "HOD Fine" });
 
-    const dues = await Due.find({ student: { $in: ids } })
+    const query = hodFeeSection
+      ? { $or: [
+          { student: { $in: ownIds } },
+          { feeSection: hodFeeSection._id } // all HOD fines regardless of dept
+        ]}
+      : { student: { $in: ownIds } };
+
+    const dues = await Due.find(query)
       .populate("feeSection", "name")
       .populate("student", "name admissionNo className");
 
-    // Attach dept name to each due for frontend use
     const result = dues.map((d) => ({
       ...d.toObject(),
       deptName: dept.name,
@@ -793,7 +798,7 @@ exports.addFine = async (req, res) => {
         feeSection = await FeeSection.create({
           name: "HOD Fine",
           applicableDepartments: [],
-          permissions: []
+          permissions: [],
         });
       }
 
@@ -802,20 +807,39 @@ exports.addFine = async (req, res) => {
         student: student._id,
         feeSection: feeSection._id,
         amount,
-        feeType,
         dueDate,
         status: "pending",
-        addedBy: "hod",
         remark: feeType,
+        addedBy: "hod", // ✅ add
+        addedByRef: req.user?.refId, // ✅ add — pass req to addFine
       });
 
       results.push({ admissionNo, due });
     }
 
     res.status(201).json({ message: "Fines added", results });
-
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deleteFine = async (req, res) => {
+  try {
+    const { fineId } = req.body;
+
+    const due = await Due.findById(fineId);
+    if (!due) return res.status(404).json({ message: "Fine not found" });
+
+    // only allow deleting HOD fines
+    if (due.addedBy !== "hod") {
+      return res.status(403).json({ message: "You can only delete fines you added" });
+    }
+
+    await Due.findByIdAndDelete(fineId);
+    res.json({ message: "Fine deleted successfully" });
+
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };

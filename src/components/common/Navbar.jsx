@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 export function Navbar({ onAvatarClick }) {
   const navigate = useNavigate();
-  const name = localStorage.getItem("name");
-  const profile = JSON.parse(localStorage.getItem("profile"));
+  const name = sessionStorage.getItem("name");
+  const profile = JSON.parse(sessionStorage.getItem("profile"));
 
   const w = useWindowWidth();
   const isMobile = w < 640;
@@ -16,7 +16,7 @@ export function Navbar({ onAvatarClick }) {
   const [hoverLogout, setHoverLogout] = useState(false);
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     navigate("/login");
   };
 

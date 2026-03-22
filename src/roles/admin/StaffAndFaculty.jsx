@@ -21,7 +21,7 @@ export default function Staff() {
   const fetchFaculty = () => {
     fetch("http://localhost:8000/api/admin/faculty", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
     })
       .then((res) => res.json())
@@ -112,7 +112,7 @@ export default function Staff() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           name: formData.name,

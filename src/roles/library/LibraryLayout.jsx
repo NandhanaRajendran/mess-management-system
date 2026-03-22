@@ -8,7 +8,7 @@ export default function LibraryLayout({ children }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("role");
+    sessionStorage.removeItem("role");
     navigate("/login");
   };
 

@@ -37,7 +37,7 @@ const StaffAdvisorDashboard = () => {
 
   
   const user = useMemo(() => {
-    return JSON.parse(localStorage.getItem("user")) || {};
+    return JSON.parse(sessionStorage.getItem("user")) || {};
   }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +47,7 @@ const StaffAdvisorDashboard = () => {
   
   const navigate = useNavigate();
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 

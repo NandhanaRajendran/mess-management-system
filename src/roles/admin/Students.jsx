@@ -24,7 +24,7 @@ export default function Students() {
   useEffect(() => {
     fetch("http://localhost:8000/api/admin/all-students", {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
     })
       .then((res) => res.json())
@@ -79,7 +79,7 @@ export default function Students() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           name: formData.name,
@@ -133,7 +133,7 @@ export default function Students() {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${sessionStorage.getItem("token")}`,
           },
           body: JSON.stringify({ admissionNo }),
         },

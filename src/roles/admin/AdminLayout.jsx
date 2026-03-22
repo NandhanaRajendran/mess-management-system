@@ -28,7 +28,7 @@ function AdminLayoutInner() {
   const { profile, initials } = useProfile();
 
   const logout = () => {
-    localStorage.removeItem("role");
+    sessionStorage.removeItem("role");
     navigate("/login");
   };
 

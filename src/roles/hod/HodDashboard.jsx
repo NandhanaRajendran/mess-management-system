@@ -435,6 +435,21 @@ const Icon = {
       <line x1="12" y1="16" x2="12.01" y2="16" />
     </svg>
   ),
+  Trash: () => (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+    >
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4h6v2" />
+    </svg>
+  ),
 };
 
 /* ─────────────────────────────────────────────
@@ -595,6 +610,7 @@ function FeeManagement({
       "Amount",
       "Due Date",
       "Status",
+      "Action",
     ];
     const tableRows = filteredFines.map((r) => [
       r.id,
@@ -668,7 +684,7 @@ function FeeManagement({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
         },
         body: JSON.stringify(payload),
       });
@@ -2029,7 +2045,7 @@ export default function App() {
 
   const authHeaders = () => ({
     "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
   });
 
   useEffect(() => {
@@ -2037,7 +2053,7 @@ export default function App() {
 
     const fetchAll = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const payload = JSON.parse(atob(token.split(".")[1]));
 
         // ── 1. HOD's own students ──
@@ -2149,12 +2165,22 @@ export default function App() {
         headers: authHeaders(),
         body: JSON.stringify(payload),
       });
-      if (!res.ok) return;
+
+      const data = await res.json();
+      console.log("add-fine response:", data); // ✅ for debugging
+
+      if (!res.ok) {
+        toast("Failed to save fine: " + (data.error || data.message), "error");
+        return; // ✅ stop here, don't update state
+      }
+
+      // ✅ only update state after confirmed DB save
+      setFinesHistory((prev) => [...newFines, ...prev]);
+      toast("Fine saved successfully!", "success");
     } catch (e) {
       console.error("Error adding fines:", e);
+      toast("Network error", "error");
     }
-
-    setFinesHistory((prev) => [...newFines, ...prev]);
   };
 
   const tabs = [

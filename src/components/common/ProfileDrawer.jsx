@@ -8,7 +8,7 @@ export function ProfileDrawer({ open, onClose }) {
   const drawerW = w < 480 ? "100vw" : "360px";
   
   // Use DB data if logged in
-  const uDataStr = localStorage.getItem("profile");
+  const uDataStr = sessionStorage.getItem("profile");
   let user = null;
   if(uDataStr && uDataStr !== "undefined") {
      user = JSON.parse(uDataStr);

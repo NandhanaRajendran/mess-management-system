@@ -34,10 +34,10 @@ export default function LoginPage() {
       }
 
       // ✅ Save login info
-      localStorage.setItem("profile", JSON.stringify(data.user.profile));
-      localStorage.setItem("username", data.user.username);
-      localStorage.setItem("role", data.user.role);
-      localStorage.setItem("token", data.token);
+      sessionStorage.setItem("profile", JSON.stringify(data.user.profile));
+      sessionStorage.setItem("username", data.user.username);
+      sessionStorage.setItem("role", data.user.role);
+      sessionStorage.setItem("token", data.token);
 
       // 🔥 Redirect based on role
       switch (data.user.role) {

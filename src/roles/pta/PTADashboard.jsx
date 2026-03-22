@@ -10,7 +10,7 @@ const PTADashboard = () => {
 
   // Get logged-in user
   const user = useMemo(() => {
-    return JSON.parse(localStorage.getItem("user")) || {};
+    return JSON.parse(sessionStorage.getItem("user")) || {};
   }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,7 +23,7 @@ const PTADashboard = () => {
   });
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 

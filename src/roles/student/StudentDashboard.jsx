@@ -19,7 +19,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     fetch("http://localhost:8000/api/admin/my-dues", {
       headers: {
-        Authorization: `Bearer${localStorage.getItem("token")}`
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`
       },
     })
       .then((res) => res.json())
