@@ -39,6 +39,7 @@ app.use("/api/balance", require("./routes/balance"));
 app.use("/api/bill", require("./routes/bill"));
 app.use("/api/staff-attendance", require("./routes/staffAttendance"));
 app.use("/api/staff-advisor", require("./routes/staffAdvisor"));
+app.use("/api/principal", require("./routes/principal"));
 app.get("/", (req, res) => {
   res.send("Mess Management Backend Running");
 });
