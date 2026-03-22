@@ -25,7 +25,7 @@ const {
     deleteFaculty, 
     updateDepartment,
     addFine,
-    deleteFine } = require("../controllers/adminController");
+    deleteFine, } = require("../controllers/adminController");
 
 const auth = require("../middleware/auth");
 

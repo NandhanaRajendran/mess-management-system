@@ -502,14 +502,21 @@ exports.getHodDues = async (req, res) => {
     const students = await Student.find({ department: dept._id });
     const ownIds = students.map((s) => s._id);
 
-    // get HOD Fine fee section
     const hodFeeSection = await FeeSection.findOne({ name: "HOD Fine" });
 
+    const mongoose = require("mongoose");
+    const refId = new mongoose.Types.ObjectId(req.user.refId); // ✅ cast to ObjectId
+
     const query = hodFeeSection
-      ? { $or: [
-          { student: { $in: ownIds } },
-          { feeSection: hodFeeSection._id } // all HOD fines regardless of dept
-        ]}
+      ? {
+          $or: [
+            { student: { $in: ownIds } },
+            {
+              feeSection: hodFeeSection._id,
+              addedByRef: refId  // ✅ now matches correctly
+            }
+          ]
+        }
       : { student: { $in: ownIds } };
 
     const dues = await Due.find(query)
@@ -519,6 +526,7 @@ exports.getHodDues = async (req, res) => {
     const result = dues.map((d) => ({
       ...d.toObject(),
       deptName: dept.name,
+      addedByRef: d.addedByRef?.toString(), // ✅ send as string to frontend
     }));
 
     res.json(result);
@@ -831,8 +839,12 @@ exports.deleteFine = async (req, res) => {
     const due = await Due.findById(fineId);
     if (!due) return res.status(404).json({ message: "Fine not found" });
 
-    // only allow deleting HOD fines
     if (due.addedBy !== "hod") {
+      return res.status(403).json({ message: "You can only delete fines you added" });
+    }
+
+    // ✅ cast both to string for comparison
+    if (due.addedByRef?.toString() !== req.user.refId?.toString()) {
       return res.status(403).json({ message: "You can only delete fines you added" });
     }
 

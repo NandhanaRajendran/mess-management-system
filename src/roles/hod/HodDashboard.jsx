@@ -574,9 +574,11 @@ function FeeManagement({
   toast,
   finesHistory,
   onAddFines,
+  onDeleteFine,
   students,
   sems,
   depts,
+  currentRefId,
 }) {
   const [fineMode, setFineMode] = useState("individual");
   const [indvSem, setIndvSem] = useState("");
@@ -596,6 +598,38 @@ function FeeManagement({
   const [finesDeptFilter] = useState("");
   const [finesSearch, setFinesSearch] = useState("");
   const [finesExportModal, setFinesExportModal] = useState(false);
+
+  const handleDeleteFine = async (fineId) => {
+    if (!window.confirm("Are you sure you want to delete this fine?")) return;
+
+    console.log("Deleting fine:", fineId); // ✅ add
+
+    try {
+      const res = await fetch("http://localhost:8000/api/admin/delete-fine", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ fineId }),
+      });
+
+      console.log("Delete response status:", res.status); // ✅ add
+      const data = await res.json();
+      console.log("Delete response data:", data); // ✅ add
+
+      if (!res.ok) {
+        toast(data.message || "Failed to delete fine", "error");
+        return;
+      }
+
+      toast("Fine deleted!", "success");
+      onDeleteFine(fineId);
+    } catch (err) {
+      console.log("Delete fine error:", err.message); // ✅ add
+      toast("Network error", "error");
+    }
+  };
 
   const generateFinesPdf = () => {
     const doc = new jsPDF("landscape");
@@ -1383,8 +1417,31 @@ function FeeManagement({
                   <Td style={{ color: C.slate500, fontSize: ".82rem" }}>
                     {r.due}
                   </Td>
+                  {/* // In fines table row — add a "Added By" indicator and
+                  conditional delete */}
+                  <Td style={{ fontSize: ".78rem", color: C.slate500 }}>
+                    {r.addedBy === "hod" ? "HOD Fine" : r.cat}
+                  </Td>
                   <Td>
                     <Badge status={r.status} />
+                  </Td>
+                  <Td>
+                    {/* ✅ only show delete if this HOD added it */}
+                    {r.addedByRef === currentRefId && (
+                      <Btn
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteFine(r._id || r.rawId)}
+                        style={{
+                          borderColor: C.red500,
+                          color: C.red500,
+                          padding: "6px 10px",
+                        }}
+                        title="Delete Fine"
+                      >
+                        <Icon.Trash />
+                      </Btn>
+                    )}
                   </Td>
                 </tr>
               ))
@@ -2043,6 +2100,16 @@ export default function App() {
     setTimeout(() => setToastVis(false), 2800);
   };
 
+  // At top of App() component
+  const currentRefId = (() => {
+    try {
+      const token = sessionStorage.getItem("token");
+      return JSON.parse(atob(token.split(".")[1])).refId;
+    } catch {
+      return null;
+    }
+  })();
+
   const authHeaders = () => ({
     "Content-Type": "application/json",
     Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -2137,6 +2204,8 @@ export default function App() {
               status: d.status === "paid" ? "Paid" : "Due",
               rawAmount: d.amount,
               rawId: d._id,
+              addedByRef: d.addedByRef || null,
+              addedBy: d.addedBy || null,
             })),
           );
         }
@@ -2150,6 +2219,12 @@ export default function App() {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleDeleteFine = (fineId) => {
+    setFinesHistory((prev) =>
+      prev.filter((f) => (f._id || f.rawId) !== fineId),
+    );
+  };
 
   const handleAddFines = async (newFines) => {
     const payload = newFines.map((f) => ({
@@ -2356,6 +2431,7 @@ export default function App() {
                 toast={toast}
                 finesHistory={finesHistory}
                 onAddFines={handleAddFines}
+                onDeleteFine={handleDeleteFine}
                 students={allStudents} // ✅ all students for adding fines
                 sems={[
                   ...new Set(allStudents.map((s) => s.sem).filter(Boolean)),
@@ -2363,6 +2439,7 @@ export default function App() {
                 depts={[
                   ...new Set(allStudents.map((s) => s.dept).filter(Boolean)),
                 ].sort()} // ✅ all depts
+                currentRefId={currentRefId}
               />
             )}
             {activeTab === "fee-cat" && (
