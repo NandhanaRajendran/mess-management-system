@@ -23,7 +23,8 @@ const {
     getAllDepartments,
     assignHod,
     deleteFaculty, 
-    updateDepartment} = require("../controllers/adminController");
+    updateDepartment,
+    addFine } = require("../controllers/adminController");
 
 const auth = require("../middleware/auth");
 
@@ -60,6 +61,7 @@ router.get("/departments",getAllDepartments);
 router.post("/assign-hod",assignHod);
 router.post("/delete-faculty",deleteFaculty);
 router.post("/update-department",updateDepartment);
+router.post("/add-fine", auth, addFine);
 
 
 

@@ -21,16 +21,20 @@ const departmentSchema = new mongoose.Schema({
             }
         }
     ],
-    username : {
-        type : String,
-        default : null,
-    },
 
-    password: {
-        type : String,
-        default : null,
-    },
-    
+    // ✅ ADD THIS
+    advisorCredentials: [
+        {
+            className: String,
+            username: String,
+            password: String,
+        }
+    ],
+
+    activeClasses: [String],
+
+    username: { type: String, default: null },
+    password: { type: String, default: null },
 
 }, { timestamps: true });
 

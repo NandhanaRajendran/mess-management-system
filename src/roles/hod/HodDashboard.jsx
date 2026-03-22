@@ -3,13 +3,8 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const SEMS = ["S2", "S4", "S6", "S8"];
-
-const DEPTS = ["CSE", "ECE", "ME", "RAI", "EEE", "IT"];
-
 const FINE_CATS = [
   "Dept.Library Fine",
-  "Late Fee",
   "Lab Damage",
   "Disciplinary Fine",
   "Other",
@@ -560,7 +555,14 @@ function Modal({ open, title, onClose, children, footer }) {
 /* ─────────────────────────────────────────────
    FEE MANAGEMENT TAB
 ───────────────────────────────────────────── */
-function FeeManagement({ toast, finesHistory, onAddFines, students }) {
+function FeeManagement({
+  toast,
+  finesHistory,
+  onAddFines,
+  students,
+  sems,
+  depts,
+}) {
   const [fineMode, setFineMode] = useState("individual");
   const [indvSem, setIndvSem] = useState("");
   const [indvDept, setIndvDept] = useState("");
@@ -656,31 +658,30 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
   );
 
   const handleApprove = async (id, isApprove) => {
-  try {
-    const payload = {
-      fineId: id,
-      action: isApprove ? "approve" : "reject"
-    };
+    try {
+      const payload = {
+        fineId: id,
+        action: isApprove ? "approve" : "reject",
+      };
 
-    const res = await fetch("http://localhost:5000/api/admin/approve-fine", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify(payload)
-    });
+      const res = await fetch("http://localhost:8000/api/admin/approve-fine", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      toast(`Fine ${isApprove ? "Approved" : "Rejected"}!`, "success");
-    } else {
-      toast("Failed to process approval", "error");
+      if (res.ok) {
+        toast(`Fine ${isApprove ? "Approved" : "Rejected"}!`, "success");
+      } else {
+        toast("Failed to process approval", "error");
+      }
+    } catch (e) {
+      toast("Network Error", "error");
     }
-
-  } catch (e) {
-    toast("Network Error", "error");
-  }
-};
+  };
 
   const semStudents = useMemo(
     () =>
@@ -784,7 +785,7 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
                   }}
                 >
                   <option value="">All Departments</option>
-                  {DEPTS.map((d) => (
+                  {depts.map((d) => (
                     <option key={d}>{d}</option>
                   ))}
                 </Select>
@@ -798,7 +799,7 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
                   }}
                 >
                   <option value="">Select Semester</option>
-                  {SEMS.map((s) => (
+                  {sems.map((s) => (
                     <option key={s}>{s}</option>
                   ))}
                 </Select>
@@ -909,7 +910,7 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
                   }}
                 >
                   <option value="">All Departments</option>
-                  {DEPTS.map((d) => (
+                  {depts.map((d) => (
                     <option key={d}>{d}</option>
                   ))}
                 </Select>
@@ -923,7 +924,7 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
                   }}
                 >
                   <option value="">Select Semester</option>
-                  {SEMS.map((s) => (
+                  {sems.map((s) => (
                     <option key={s}>{s}</option>
                   ))}
                 </Select>
@@ -1094,7 +1095,7 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
                   onChange={(e) => setClassDept(e.target.value)}
                 >
                   <option value="">All Departments</option>
-                  {DEPTS.map((d) => (
+                  {depts.map((d) => (
                     <option key={d}>{d}</option>
                   ))}
                 </Select>
@@ -1105,7 +1106,7 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
                   onChange={(e) => setClassSem(e.target.value)}
                 >
                   <option value="">Select Semester</option>
-                  {SEMS.map((s) => (
+                  {sems.map((s) => (
                     <option key={s}>{s}</option>
                   ))}
                 </Select>
@@ -1296,7 +1297,7 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
               style={{ width: 140, padding: "6px 10px", fontSize: ".8rem" }}
             >
               <option value="">All Classes</option>
-              {SEMS.map((s) => (
+              {sems.map((s) => (
                 <option key={s}>{s}</option>
               ))}
             </Select>
@@ -1474,8 +1475,13 @@ function FeeManagement({ toast, finesHistory, onAddFines, students }) {
 /* ─────────────────────────────────────────────
    FEE CATEGORIES TAB
 ───────────────────────────────────────────── */
-function FeeCategories({ feeData }) {
-  const [sem, setSem] = useState("S8");
+function FeeCategories({ feeData, sems }) {
+  const [sem, setSem] = useState("");
+
+  // set default to last sem when sems loads
+  useEffect(() => {
+    if (sems.length > 0) setSem(sems[sems.length - 1]);
+  }, [sems]);
   const rows = feeData[sem] || [];
   const published = rows.filter((r) => r.status === "Published").length;
   const pending = rows.filter((r) => r.status === "Pending").length;
@@ -1516,7 +1522,7 @@ function FeeCategories({ feeData }) {
           }}
         >
           <div style={{ display: "flex", gap: 6 }}>
-            {SEMS.map((s) => (
+            {sems.map((s) => (
               <button
                 key={s}
                 onClick={() => setSem(s)}
@@ -1577,7 +1583,7 @@ function FeeCategories({ feeData }) {
 /* ─────────────────────────────────────────────
    DUE SHEET TAB
 ───────────────────────────────────────────── */
-function DueSheet({ toast, dueData }) {
+function DueSheet({ toast, dueData, sems }) {
   const [sem, setSem] = useState("");
   const [feeType, setFeeType] = useState("all");
   const [admNo, setAdmNo] = useState("");
@@ -1795,7 +1801,7 @@ function DueSheet({ toast, dueData }) {
         <FormGroup label="Filter by Semester">
           <Select value={sem} onChange={(e) => setSem(e.target.value)}>
             <option value="">All Semesters</option>
-            {SEMS.map((s) => (
+            {sems.map((s) => (
               <option key={s}>{s}</option>
             ))}
           </Select>
@@ -2008,6 +2014,9 @@ export default function App() {
   const [feeData, setFeeData] = useState({ S2: [], S4: [], S6: [], S8: [] });
   const [deptName, setDeptName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sems, setSems] = useState([]);
+  const [depts, setDepts] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
 
   const navigate = useNavigate();
 
@@ -2024,35 +2033,60 @@ export default function App() {
   });
 
   useEffect(() => {
-    const BASE = "http://localhost:5000/api/admin";
+    const BASE = "http://localhost:8000/api/admin";
 
     const fetchAll = async () => {
       try {
-        // ── 1. Unique students list ──────────────────────────────────
+        const token = localStorage.getItem("token");
+        const payload = JSON.parse(atob(token.split(".")[1]));
+
+        // ── 1. HOD's own students ──
         const studRes = await fetch(`${BASE}/hod-students`, {
           headers: authHeaders(),
         });
         if (studRes.ok) {
           const studJson = await studRes.json();
           setDeptName(studJson.deptName || "");
+          const uniqueSems = [
+            ...new Set(
+              (studJson.students || []).map((s) => s.className).filter(Boolean),
+            ),
+          ].sort();
+          setSems(uniqueSems);
+          setDepts([studJson.deptName].filter(Boolean));
           setStudents(
             (studJson.students || []).map((s) => ({
               id: s.admissionNo,
               name: s.name,
               sem: s.className,
               dept: s.department?.name || studJson.deptName || "",
-            }))
+            })),
           );
         }
 
-        // ── 2. Due-sheet breakdown + fee categories ──────────────────
+        // ── 2. All students (for adding fines across departments) ──  ✅ INSIDE fetchAll
+        const allStudRes = await fetch(`${BASE}/all-students`, {
+          headers: authHeaders(),
+        });
+        if (allStudRes.ok) {
+          const allStudJson = await allStudRes.json();
+          setAllStudents(
+            (allStudJson || []).map((s) => ({
+              id: s.admissionNo,
+              name: s.name,
+              sem: s.className,
+              dept: s.department?.name || "",
+            })),
+          );
+        }
+
+        // ── 3. Due-sheet breakdown + fee categories ──
         const sheetRes = await fetch(`${BASE}/hod-due-sheet`, {
           headers: authHeaders(),
         });
         if (sheetRes.ok) {
           const sheetJson = await sheetRes.json();
           setDueData(sheetJson.rows || []);
-
           const raw = sheetJson.feeData || {};
           setFeeData({
             S1: raw["S1"] || [],
@@ -2066,7 +2100,7 @@ export default function App() {
           });
         }
 
-        // ── 3. Fines / dues history ──────────────────────────────────
+        // ── 4. Fines / dues history ──
         const duesRes = await fetch(`${BASE}/hod-dues`, {
           headers: authHeaders(),
         });
@@ -2087,7 +2121,7 @@ export default function App() {
               status: d.status === "paid" ? "Paid" : "Due",
               rawAmount: d.amount,
               rawId: d._id,
-            }))
+            })),
           );
         }
       } catch (err) {
@@ -2110,7 +2144,7 @@ export default function App() {
     }));
 
     try {
-      const res = await fetch("http://localhost:5000/api/admin/add-fine", {
+      const res = await fetch("http://localhost:8000/api/admin/add-fine", {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify(payload),
@@ -2270,9 +2304,7 @@ export default function App() {
                 background: activeTab === t.id ? C.sky600 : "transparent",
                 color: activeTab === t.id ? C.white : C.slate500,
                 boxShadow:
-                  activeTab === t.id
-                    ? "0 2px 8px rgba(2,132,199,.3)"
-                    : "none",
+                  activeTab === t.id ? "0 2px 8px rgba(2,132,199,.3)" : "none",
               }}
             >
               {t.label}
@@ -2298,12 +2330,27 @@ export default function App() {
                 toast={toast}
                 finesHistory={finesHistory}
                 onAddFines={handleAddFines}
-                students={students}
+                students={allStudents} // ✅ all students for adding fines
+                sems={[
+                  ...new Set(allStudents.map((s) => s.sem).filter(Boolean)),
+                ].sort()} // ✅ all sems
+                depts={[
+                  ...new Set(allStudents.map((s) => s.dept).filter(Boolean)),
+                ].sort()} // ✅ all depts
               />
             )}
-            {activeTab === "fee-cat" && <FeeCategories feeData={feeData} />}
+            {activeTab === "fee-cat" && (
+              <FeeCategories
+                feeData={feeData}
+                sems={sems} // ✅
+              />
+            )}
             {activeTab === "due-sheet" && (
-              <DueSheet toast={toast} dueData={dueData} />
+              <DueSheet
+                toast={toast}
+                dueData={dueData}
+                sems={sems} // ✅
+              />
             )}
           </>
         )}

@@ -17,7 +17,7 @@ export default function StudentDashboard() {
   const [studentId] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/my-dues", {
+    fetch("http://localhost:8000/api/admin/my-dues", {
       headers: {
         Authorization: `Bearer${localStorage.getItem("token")}`
       },

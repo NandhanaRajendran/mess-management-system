@@ -19,7 +19,7 @@ export default function Staff() {
   });
 
   const fetchFaculty = () => {
-    fetch("http://localhost:5000/api/admin/faculty", {
+    fetch("http://localhost:8000/api/admin/faculty", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -39,7 +39,7 @@ export default function Staff() {
 
   // ✅ FETCH DEPARTMENTS
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/departments")
+    fetch("http://localhost:8000/api/admin/departments")
       .then((res) => res.json())
       .then((data) => setDepartments(data))
       .catch(console.error);
@@ -65,7 +65,7 @@ export default function Staff() {
       console.log(f);
       
       const res = await fetch(
-        "http://localhost:5000/api/admin/delete-faculty",
+        "http://localhost:8000/api/admin/delete-faculty",
         {
           method: "POST",
           headers: {
@@ -108,7 +108,7 @@ export default function Staff() {
         (d) => d.name === formData.department,
       );
 
-      const res = await fetch("http://localhost:5000/api/admin/add-faculty", {
+      const res = await fetch("http://localhost:8000/api/admin/add-faculty", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

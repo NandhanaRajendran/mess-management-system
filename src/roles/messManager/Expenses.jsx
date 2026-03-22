@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Layout from "../../components/Layout";
 import AlertToast from "../../components/Alerttoast";
 
-//const API = "http://localhost:5000";
+//const API = "http://localhost:8000";
 const API = "https://mess-management-system-q6us.onrender.com";
 // Staff salary rules
 const STAFF_RULES = {

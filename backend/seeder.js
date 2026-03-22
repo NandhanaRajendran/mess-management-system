@@ -53,8 +53,8 @@ const importData = async () => {
       role: "admin",
     });
 
-    console.log("Admin recreated ✅");
-    console.log("Saved user: ",created);
+    // (console.log"Admin recreated ✅");
+    // console.log("Saved user: ",created);
     
    // const test = await bcrypt.compare("1234", hashed);
    // console.log("Manual test:", test);
@@ -63,7 +63,7 @@ const importData = async () => {
 
     if (!dept) {
       dept = await Department.create({ name: "CSE" });
-      console.log("Department created ✅");
+      //console.log("Department created ✅");
     }
 
     const deptId = dept._id;
@@ -93,9 +93,9 @@ const importData = async () => {
 
     await Student.insertMany(students);
 
-    console.log("Students Imported ✅");
+    //console.log("Students Imported ✅");
 
-    console.log(await bcrypt.compare("1234", created.password));
+    //console.log(await bcrypt.compare("1234", created.password));
 
     process.exit();
   } catch (error) {

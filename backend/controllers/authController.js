@@ -14,21 +14,21 @@ exports.login = async (req, res) => {
     }
     const cleanPassword = String(password).trim();
 
-    console.log("Req.body: ", req.body);
+    // console.log("Req.body: ", req.body);
 
-    console.log("Login DB: ", process.env.MONGO_URI);
+    // console.log("Login DB: ", process.env.MONGO_URI);
 
-    console.log("Entered username:", username);
-    console.log("Entered password:", password);
-    console.log("User found:", user);
+    // console.log("Entered username:", username);
+    // console.log("Entered password:", password);
+    // console.log("User found:", user);
 
-    console.log("Stored password:", user.password);
+    // console.log("Stored password:", user.password);
 
-    console.log("Type of password: ", typeof password);
-    console.log("Type of password: ", typeof user.password);
+    // console.log("Type of password: ", typeof password);
+    // console.log("Type of password: ", typeof user.password);
 
     const isMatch = await bcrypt.compare(cleanPassword, user.password);
-    console.log("Match result:", isMatch);
+    //console.log("Match result:", isMatch);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
@@ -45,7 +45,7 @@ exports.login = async (req, res) => {
       { expiresIn: "1d" },
     );
 
-    console.log("JWT: ",process.env.JWT_SECRET);
+   // console.log("JWT: ",process.env.JWT_SECRET);
     
 
     let profile = null;
@@ -75,3 +75,4 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+

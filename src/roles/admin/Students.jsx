@@ -22,7 +22,7 @@ export default function Students() {
 
   //Fetch Students
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/all-students", {
+    fetch("http://localhost:8000/api/admin/all-students", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -34,7 +34,7 @@ export default function Students() {
 
   //Fetch departments
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/departments")
+    fetch("http://localhost:8000/api/admin/departments")
       .then((res) => res.json())
       .then((data) => setDepartments(data))
       .catch(console.error);
@@ -75,7 +75,7 @@ export default function Students() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/admin/add-student", {
+      const res = await fetch("http://localhost:8000/api/admin/add-student", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -128,7 +128,7 @@ export default function Students() {
   const handleDelete = async (admissionNo) => {
     try {
       const res = await fetch(
-        "http://localhost:5000/api/admin/delete-student",
+        "http://localhost:8000/api/admin/delete-student",
         {
           method: "DELETE",
           headers: {

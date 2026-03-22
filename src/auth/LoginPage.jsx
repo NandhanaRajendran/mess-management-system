@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 export default function LoginPage() {
-
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -10,83 +9,87 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   async function handleLogin(e) {
-  e.preventDefault();
+    e.preventDefault();
+    console.log("handleLogin triggered"); // ✅ add this as FIRST line
+    console.log("username:", username, "password:", password);
 
-  try {
-    console.log("Sending login request...");
-    const res = await fetch("http://localhost:5000/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ username, password })
-    });
+    try {
+      console.log("Sending login request...");
+      const res = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
+      console.log("Response status:", res.status);
+      console.log("Response data:", data);
+      console.log(data.user.role);
 
-    if (!res.ok) {
-      setError(data.message || "Login failed");
-      return;
+      if (!res.ok) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // ✅ Save login info
+      localStorage.setItem("profile", JSON.stringify(data.user.profile));
+      localStorage.setItem("username", data.user.username);
+      localStorage.setItem("role", data.user.role);
+      localStorage.setItem("token", data.token);
+
+      // 🔥 Redirect based on role
+      switch (data.user.role) {
+        case "admin":
+          navigate("/admin/dashboard");
+          break;
+        case "student":
+          navigate("/student/dashboard");
+          break;
+        case "hod":
+          navigate("/hod/dashboard");
+          break;
+        case "staffAdvisor":
+          navigate("/staffadvisor/dashboard");
+          break;
+        case "feeManager":
+          navigate("/fee/dashboard");
+          break;
+        default:
+          navigate("/");
+      }
+    } catch (err) {
+      console.log("Catch error:", err.message); // ✅ add this
+      setError("Server error: " + err.message);
     }
-
-    // ✅ Save login info
-    localStorage.setItem("profile", JSON.stringify(data.user.profile));
-    localStorage.setItem("username", data.user.username);
-    localStorage.setItem("role", data.user.role);
-    localStorage.setItem("token", data.token);
-
-    // 🔥 Redirect based on role
-    switch (data.user.role) {
-      case "admin":
-        navigate("/admin/dashboard");
-        break;
-      case "student":
-        navigate("/student/dashboard");
-        break;
-      case "hod":
-        navigate("/hod/dashboard");
-        break;
-      case "staffAdvisor":
-        navigate("/staffadvisor/dashboard");
-        break;
-      case "feeManager":
-        navigate("/fee/dashboard");
-        break;
-      default:
-        navigate("/");
-    }
-
-  } catch (err) {
-    setError("Server error");
   }
-}
 
   return (
     <div className="login">
-        <div className="circle c1"></div>
-        <div className="circle c2"></div>
-        <div className="circle c3"></div>
-        <div className="circle c4"></div>
-        <div className="circle c5"></div>
+      <div className="circle c1"></div>
+      <div className="circle c2"></div>
+      <div className="circle c3"></div>
+      <div className="circle c4"></div>
+      <div className="circle c5"></div>
       <div className="box">
-            <div className="logo">
-          <h1  className="heading">🎓 UNIPAY </h1>
-            </div>
-  
+        <div className="logo">
+          <h1 className="heading">🎓 UNIPAY </h1>
+        </div>
 
         <input
           type="text"
           placeholder="Username"
+          value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
-    
 
         <input
           type="password"
           placeholder="Password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-
 
         <button className="btnFeatures" onClick={handleLogin}>
           Login
