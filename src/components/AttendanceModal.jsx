@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import "../styles/mess.css";
 
-const API = "http://localhost:8000";
-// const API = "https://mess-management-system-q6us.onrender.com"; // ← uncomment for production
+//const API = "http://localhost:8000";
+const API = "https://mess-management-system-q6us.onrender.com"; // ← uncomment for production
 
 export default function AttendanceModal({ onClose }) {
   const currentYear  = new Date().getFullYear();
