@@ -53,8 +53,11 @@ export default function LoginPage() {
         case "staffAdvisor":
           navigate("/staffadvisor/dashboard");
           break;
-        case "feeManager":
-          navigate("/fee/dashboard");
+        case "messManager":
+          navigate("/mess/dashboard");
+          break;
+        case "principal":
+          navigate("/principal-dashboard");
           break;
         default:
           navigate("/");

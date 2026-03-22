@@ -35,6 +35,7 @@ import Pta from "./roles/pta/PTADashboard";
 import Staffadvisor from "./roles/staffAdvisor/StaffAdvisorDashboard";
 
 
+
 function App() {
   return (
     <Router>
@@ -49,7 +50,7 @@ function App() {
         <Route path="/mess/messbill" element={<MessBill />} />
        
 
-        <Route path="/principal/dashboard" element = {<PrincipalDashboard/>} />
+        <Route path="/principal-dashboard" element = {<PrincipalDashboard/>} />
         <Route path="/hostel/dashboard" element = {<HostelDashboard/>}/>
         
         <Route path="/hostel/viewrent" element = {<ViewRent/>}/>

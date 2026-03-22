@@ -22,7 +22,8 @@ const userSchema = new mongoose.Schema(
         "faculty",
         "hod",
         "staffAdvisor",
-        "feeManager",
+        "messManager",
+        "principal"
       ],
       required: true,
     },
@@ -30,13 +31,13 @@ const userSchema = new mongoose.Schema(
     refId: {
       type: mongoose.Schema.Types.ObjectId,
       required: function () {
-        return this.role !== "admin";
+        return !["admin","principal","messManager"].includes(this.role);
       },
     },
     refModel: {
       type: String,
       required: function () {
-        return this.role !== "admin";
+        return !["admin","principal","messManager"].includes(this.role);
       },
     },
   },

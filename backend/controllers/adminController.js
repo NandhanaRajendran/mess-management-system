@@ -311,6 +311,7 @@ exports.assignAdvisor = async (req, res) => {
       .toLowerCase()
       .slice(0, 6);
 
+    const semShort = semester.toLowerCase(); 
     const username = `${semShort}_${deptShort}_adv`;
     const password = generatePassword();
 
@@ -384,7 +385,7 @@ exports.createFeeSection = async (req, res) => {
     await User.create({
       username: `fee_${name.toLowerCase().replace(/\s+/g, "_")}`,
       password,
-      role: "feeManager",
+      role: "messManager",
       refId: feeSection._id,
       refModel: "FeeSection",
     });
@@ -850,6 +851,56 @@ exports.deleteFine = async (req, res) => {
 
     await Due.findByIdAndDelete(fineId);
     res.json({ message: "Fine deleted successfully" });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.createPrincipal = async (req, res) => {
+  try {
+    const { username, password, role } = req.body;
+
+    // check already exists
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const principal = new User({
+      username,
+      password,   // will be hashed automatically
+      role
+    });
+
+    await principal.save();
+
+    res.status(201).json({
+      message: `${role} created successfully`,
+      credentials: {
+        username,
+        password
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updateUserRole = async (req, res) => {
+  try {
+    const { username, role } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.role = role;
+    await user.save();
+
+    res.json({ message: "Role updated successfully", user });
 
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -62,6 +62,8 @@ exports.login = async (req, res) => {
       profile = await Faculty.findById(user.refId).select("name facultyId");
     }
 
+    
+
     res.json({
       message: "Login successful",
       token,

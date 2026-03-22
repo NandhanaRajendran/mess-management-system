@@ -202,14 +202,14 @@ const PrincipalDashboard = () => {
             onChange={(e) => setSemester(e.target.value)}
           >
             <option value="">All Semester</option>
-            <option value="1">Sem 1</option>
-            <option value="2">Sem 2</option>
-            <option value="3">Sem 3</option>
-            <option value="4">Sem 4</option>
-            <option value="5">Sem 5</option>
-            <option value="6">Sem 6</option>
-            <option value="7">Sem 7</option>
-            <option value="8">Sem 8</option>
+            <option value="1">S1</option>
+            <option value="2">S2</option>
+            <option value="3">S3</option>
+            <option value="4">S4</option>
+            <option value="5">S5</option>
+            <option value="6">S6</option>
+            <option value="7">S7</option>
+            <option value="8">S8</option>
           </select>
 
         </div>

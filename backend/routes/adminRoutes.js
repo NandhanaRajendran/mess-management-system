@@ -25,7 +25,9 @@ const {
     deleteFaculty, 
     updateDepartment,
     addFine,
-    deleteFine, } = require("../controllers/adminController");
+    deleteFine,
+    createPrincipal,
+    updateUserRole, } = require("../controllers/adminController");
 
 const auth = require("../middleware/auth");
 
@@ -64,7 +66,8 @@ router.post("/delete-faculty",deleteFaculty);
 router.post("/update-department",updateDepartment);
 router.post("/add-fine", auth, addFine);
 router.delete("/delete-fine", auth, deleteFine);
-
+router.post("/create-principal",createPrincipal);
+router.put("/update-role",updateUserRole);
 
 
 module.exports = router;
