@@ -1,44 +1,19 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Search, LogOut, ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/staffadvisor.css";
 
-// ── Inline dummy data ──────────────────────────────────────────────────────────
-const students = [
-  // Computer Science – 2021-25
-  { id: 1,  admissionNumber: "CS21001", name: "Aarav Patel",       department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 2,  admissionNumber: "CS21002", name: "Priya Sharma",      department: "Computer Science", batch: "2021-25", status: "Pending", fees: { Library: 500,  PTA: 2000, HDF: 1500, Rent: 0,    Mess: 0    } },
-  { id: 3,  admissionNumber: "CS21003", name: "Rohan Gupta",       department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 4,  admissionNumber: "CS21004", name: "Sneha Nair",        department: "Computer Science", batch: "2021-25", status: "Pending", fees: { Library: 300,  PTA: 0,    HDF: 1500, Rent: 4500, Mess: 2200 } },
-  { id: 5,  admissionNumber: "CS21005", name: "Karthik Iyer",      department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 6,  admissionNumber: "CS21006", name: "Divya Menon",       department: "Computer Science", batch: "2021-25", status: "Pending", fees: { Library: 0,    PTA: 1500, HDF: 0,    Rent: 4500, Mess: 3100 } },
-  { id: 7,  admissionNumber: "CS21007", name: "Arjun Reddy",       department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 8,  admissionNumber: "CS21008", name: "Meera Pillai",      department: "Computer Science", batch: "2021-25", status: "Pending", fees: { Library: 500,  PTA: 2000, HDF: 1500, Rent: 0,    Mess: 1800 } },
-  { id: 9,  admissionNumber: "CS21009", name: "Vikram Singh",      department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 10, admissionNumber: "CS21010", name: "Ananya Krishnan",   department: "Computer Science", batch: "2021-25", status: "Pending", fees: { Library: 300,  PTA: 0,    HDF: 0,    Rent: 4500, Mess: 0    } },
-  { id: 11, admissionNumber: "CS21011", name: "Rahul Desai",       department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 12, admissionNumber: "CS21012", name: "Pooja Venkat",      department: "Computer Science", batch: "2021-25", status: "Pending", fees: { Library: 500,  PTA: 2000, HDF: 1500, Rent: 4500, Mess: 2500 } },
-  { id: 13, admissionNumber: "CS21013", name: "Nikhil Joshi",      department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 14, admissionNumber: "CS21014", name: "Lakshmi Rajan",     department: "Computer Science", batch: "2021-25", status: "Pending", fees: { Library: 0,    PTA: 1500, HDF: 1500, Rent: 0,    Mess: 3100 } },
-  { id: 15, admissionNumber: "CS21015", name: "Suresh Babu",       department: "Computer Science", batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-
-  // Electronics – 2021-25
-  { id: 16, admissionNumber: "EC21001", name: "Aishwarya Nambiar", department: "Electronics",      batch: "2021-25", status: "Pending", fees: { Library: 500,  PTA: 2000, HDF: 0,    Rent: 4500, Mess: 1800 } },
-  { id: 17, admissionNumber: "EC21002", name: "Deepak Varma",      department: "Electronics",      batch: "2021-25", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 18, admissionNumber: "EC21003", name: "Swathi Gopalan",    department: "Electronics",      batch: "2021-25", status: "Pending", fees: { Library: 300,  PTA: 0,    HDF: 1500, Rent: 0,    Mess: 2200 } },
-
-  // Computer Science – 2022-26
-  { id: 19, admissionNumber: "CS22001", name: "Ishaan Malhotra",   department: "Computer Science", batch: "2022-26", status: "Paid",    fees: { Library: 0,    PTA: 0,    HDF: 0,    Rent: 0,    Mess: 0    } },
-  { id: 20, admissionNumber: "CS22002", name: "Riya Chandran",     department: "Computer Science", batch: "2022-26", status: "Pending", fees: { Library: 500,  PTA: 1500, HDF: 1500, Rent: 4500, Mess: 3100 } },
-];
-// ──────────────────────────────────────────────────────────────────────────────
-
 const StaffAdvisorDashboard = () => {
 
-  
-  const user = useMemo(() => {
+  const userContext = useMemo(() => {
     return JSON.parse(sessionStorage.getItem("user")) || {};
   }, []);
+  
+  // Try to use the user directly or their profile
+  const user = userContext.profile || userContext;
+
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
@@ -51,14 +26,35 @@ const StaffAdvisorDashboard = () => {
     navigate("/login");
   };
 
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        // Assuming user object has department and className/batch
+        const dept = user?.department || userContext?.department || "Computer Science"; // Default to CS if empty for testing
+        const batch = user?.className || user?.batch || userContext?.batch || "2021-25"; // Default if empty
+        
+        const response = await fetch(`http://localhost:8000/api/staff-advisor/students?department=${dept}&batch=${batch}`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch students");
+        }
+        
+        const data = await response.json();
+        setStudents(data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, [user, userContext]);
+
   const filteredStudents = useMemo(() => {
-    if (!user?.department || !user?.batch) return [];
-    return students.filter(
-      (student) =>
-        student.department === user.department &&
-        student.batch === user.batch
-    );
-  }, [user]);
+    return students;
+  }, [students]);
 
   const processedStudents = useMemo(() => {
     let result = [...filteredStudents];
