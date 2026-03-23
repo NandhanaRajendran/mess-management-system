@@ -23,7 +23,6 @@ import LibraryRoot from "./roles/library/LibraryRoot";
 import StudentList from "./roles/library/StudentList";
 import DueSheet from "./roles/library/DueSheet";
 
-import PrincipalDashboard from "./roles/principle/PrincipleDashboard";
 
 import HostelDashboard from "./roles/hostel/hostelDashboard";
 import ViewHdf from "./roles/hostel/ViewHdf";
@@ -52,7 +51,7 @@ function App() {
         <Route path="/mess/attendance" element={<Attendance />} />
         <Route path="/mess/expenses" element={<Expenses />} />
         <Route path="/mess/messbill" element={<MessBill />} />
-       
+
 
         <Route path="/hostel/dashboard" element={<HostelDashboard />} />
         <Route path="/hostel/viewrent" element={<ViewRent />} />
@@ -60,12 +59,12 @@ function App() {
         <Route path="/hostel/enroll" element={<Enrollment />} />
         <Route path="/manual-hdf" element={<ManualHDF />} />
         <Route path="/manual-rent" element={<ManualRent />} />
-        
-        <Route path="/hod/dashboard" element={<Hod />} />
-        <Route path="/student/dashboard" element = {<Student/>}/>
 
-        <Route path="/pta/dashboard" element = {<Pta/>} />
-        <Route path="staffadvisor/dashboard" element = {<Staffadvisor/>}/>
+        <Route path="/hod/dashboard" element={<Hod />} />
+        <Route path="/student/dashboard" element={<Student />} />
+
+        <Route path="/pta/dashboard" element={<Pta />} />
+        <Route path="staffadvisor/dashboard" element={<Staffadvisor />} />
         <Route path="/fee/dashboard" element={<FeeSectionDashboard />} />
 
         <Route path="/admin" element={<AdminLayout />}>
