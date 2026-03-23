@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Layout from "../../components/Layout";
 import AlertToast from "../../components/Alerttoast";
 
-//const API = "http://localhost:8000";
-const API = "https://mess-management-system-q6us.onrender.com";
+const API = "http://localhost:8000";
+//const API = "https://mess-management-system-q6us.onrender.com";
 
 const ModernSelect = ({ value, onChange, options, style, disabled }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -161,8 +161,9 @@ export default function Attendance() {
       const billData  = billRes.ok  ? await billRes.json()  : {};
       const staffData = staffRes.ok ? await staffRes.json() : [];
 
-      studData.sort((a, b) => a.room.localeCompare(b.room) || a.name.localeCompare(b.name));
-      setStudents(studData);
+      const hostelInmates = studData.filter(s => s.room && s.room.trim() !== "");
+      hostelInmates.sort((a, b) => String(a.room).localeCompare(String(b.room)) || String(a.name).localeCompare(String(b.name)));
+      setStudents(hostelInmates);
       setIsPublished(billData?.published || false);
 
       const map = { "Cook Salary": {}, "Matron Salary": {} };
@@ -523,7 +524,7 @@ export default function Attendance() {
                   return (
                     <tr key={student._id} style={{ borderTop: isNewRoom && students.indexOf(student) !== 0 ? "2px solid #e2e8f0" : "1px solid #f1f5f9", opacity: isUpd ? 0.6 : 1, transition: "opacity 0.15s" }}>
                       <td style={{ padding: "10px 14px", fontWeight: "700", color: "#0f172a" }}>{student.room}</td>
-                      <td style={{ padding: "10px 14px", color: "#64748b", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>{student.adno || "—"}</td>
+                      <td style={{ padding: "10px 14px", color: "#64748b", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px" }}>{student.admissionNo || "—"}</td>
                       <td style={{ padding: "10px 14px", color: "#1e293b", fontWeight: "500" }}>{student.name}</td>
                       <td style={{ padding: "10px 14px", textAlign: "center" }}>
                         <button onClick={() => togglePresent(student)} disabled={isPublished || isUpd}

@@ -75,4 +75,18 @@ router.get("/fee-sections", getAllFeeSections);
 router.post("/update-fee-section", updateFeeSection);
 router.delete("/delete-fee-section", deleteFeeSectionById);
 
+<<<<<<< HEAD
+=======
+const Faculty = require("../models/Faculty");
+router.get("/faculty/id/:facultyId", async (req, res) => {
+  try {
+    const faculty = await Faculty.findOne({ facultyId: req.params.facultyId }).populate('department');
+    if (!faculty) return res.status(404).json({ message: "Faculty not found" });
+    res.json(faculty);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+>>>>>>> af93134 (Hostel section connected with admin and mess manager)
 module.exports = router;

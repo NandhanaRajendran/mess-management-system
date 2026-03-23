@@ -26,12 +26,12 @@ export default function LoginPage() {
       const data = await res.json();
       console.log("Response status:", res.status);
       console.log("Response data:", data);
-      console.log(data.user.role);
-
       if (!res.ok) {
         setError(data.message || "Login failed");
         return;
       }
+
+      console.log(data.user.role);
 
       // ✅ Save login info
       sessionStorage.setItem("profile", JSON.stringify(data.user.profile));
@@ -62,6 +62,12 @@ export default function LoginPage() {
         case "feeManager":
           navigate("/fee/dashboard");
           break;
+<<<<<<< HEAD
+=======
+        case "hostelManager":
+          navigate("/hostel/dashboard");
+          break;
+>>>>>>> af93134 (Hostel section connected with admin and mess manager)
         default:
           navigate("/");
       }

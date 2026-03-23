@@ -1,89 +1,158 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/hostel.css";
 
-function ViewRent() {
-  const navigate = useNavigate();
+const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-  const [students] = useState([
-    { id: "S101", name: "Anu", month: "March", rent: 4500, status: "Pending" },
-    { id: "S102", name: "Rahul", month: "March", rent: 4500, status: "Pending" },
-    { id: "S103", name: "Meera", month: "March", rent: 4500, status: "Paid" },
-  ]);
+function PublishRent(){
 
-  const downloadCSV = () => {
-    const headers = ["ID", "Name", "Month", "Amount", "Status"];
+const navigate = useNavigate();
 
-    const rows = students.map((s) => [
-      s.id,
-      s.name,
-      s.month,
-      s.rent,
-      s.status,
-    ]);
+const [students, setStudents] = useState([]);
+const [selectedMonth, setSelectedMonth] = useState(months[new Date().getMonth()]);
+const [selectedYear, setSelectedYear] = useState("2024"); // Default matching dashboard
 
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers, ...rows].map((row) => row.join(",")).join("\n");
+useEffect(() => {
+  fetch("http://localhost:8000/api/students")
+    .then(res => res.json())
+    .then(data => {
+      const studentArray = Array.isArray(data) ? data : [];
+      const monthIndex = months.indexOf(selectedMonth);
+      const targetYear = Number(selectedYear);
 
-    const encodedUri = encodeURI(csvContent);
+      // ✅ Special Rule: In 2026, month is June. No "Dues" after June.
+      if (targetYear === 2026 && monthIndex > 5) {
+        setStudents([]);
+        return;
+      }
 
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "rent_dues.csv");
+      const mapped = studentArray.filter(s => {
+        const admissionYear = parseInt(String(s.admission).substring(0, 4));
+        if (isNaN(admissionYear)) return false;
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+        // Hide graduates logic (same as dashboard)
+        if (targetYear === 2026 && (admissionYear === 2022 || admissionYear === 2024)) return false;
 
-  return (
-    <div className="hostelPage">
-      <div className="formPage">
-        <div className="formCard" style={{ width: "650px" }}>
-          <div className="formHeader">
-            <button
-              className="backBtn"
-              onClick={() => navigate("/hostel/dashboard")}
-            >
-              ← Back
-            </button>
+        return targetYear >= admissionYear && targetYear < admissionYear + 4;
+      }).map(s => {
+        const admissionYear = parseInt(String(s.admission).substring(0, 4));
+        const monthsOffset = (targetYear - admissionYear) * 12;
+        const totalPaid = s.rentPaidMonths || 0;
+        
+        let paidThisYear = totalPaid - monthsOffset;
+        if (paidThisYear < 0) paidThisYear = 0;
+        if (paidThisYear > 12) paidThisYear = 12;
 
-            <h2>View Rent Due</h2>
-          </div>
+        const isRecentlyPublished = s.feeUpdatedAt ? (new Date() - new Date(s.feeUpdatedAt)) / (1000 * 60 * 60 * 24) < 10 : false;
+        const isNotYetPending = (monthIndex === (targetYear === 2026 ? 5 : 11)) && isRecentlyPublished;
 
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Month</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
+        const isDue = monthIndex >= paidThisYear && !isNotYetPending;
 
-            <tbody>
-              {students.map((student, index) => (
-                <tr key={index}>
-                  <td>{student.id}</td>
-                  <td>{student.name}</td>
-                  <td>{student.month}</td>
-                  <td>₹{student.rent}</td>
+        return {
+          id: s.admission,
+          name: s.name,
+          month: selectedMonth,
+          rent: Math.round((s.HostelRent || 1860) / 6),
+          isDue: isDue
+        };
+      })
+      .filter(s => s.isDue); 
 
-                  <td><span className="due">{student.status}</span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      setStudents(mapped);
+    })
+    .catch(err => console.error(err));
+}, [selectedMonth, selectedYear]);
 
-          <button className="submitBtn" onClick={downloadCSV}>
-            Download
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+const handlePrint = () => {
+window.print();
+};
+
+return(
+
+<div className="paymentApp" style={{ userSelect: 'none' }}>
+
+<div className="formPage">
+
+<div className="formCard" style={{width:"650px"}}>
+
+<div className="formHeader" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+
+<button
+  className="manual-back"
+  style={{ margin: '0' }}
+  onMouseDown={(e) => e.preventDefault()}
+  onClick={() => navigate(-1)}
+>
+  Back
+</button>
+
+<h2 style={{ margin: '0', flexGrow: 1, textAlign: 'center' }}>Rent Due List</h2>
+
+<select 
+  value={selectedYear} 
+  onChange={(e) => setSelectedYear(e.target.value)}
+  style={{ padding: '2px 5px', borderRadius: '5px', fontSize: '13px', width: '70px', marginLeft: '10px' }}
+>
+  {[...Array(12).keys()].map(i => {
+    const y = 2019 + i;
+    return <option key={y} value={y}>{y}</option>;
+  })}
+</select>
+
+<select 
+  value={selectedMonth} 
+  onChange={(e) => setSelectedMonth(e.target.value)}
+  style={{ padding: '2px 5px', borderRadius: '5px', fontSize: '13px', width: '70px', marginLeft: '10px' }}
+>
+  {months.map(m => (
+    <option key={m} value={m}>{m}</option>
+  ))}
+</select>
+
+</div>
+
+<table style={{ marginBottom: '30px', tableLayout: 'fixed', width: '100%' }}>
+
+<thead>
+<tr>
+<th style={{ textAlign: 'center', width: '20%' }}>ID</th>
+<th style={{ textAlign: 'center', width: '25%' }}>Name</th>
+<th style={{ textAlign: 'center', width: '20%' }}>Month</th>
+<th style={{ textAlign: 'center', width: '20%' }}>Amount</th>
+<th style={{ textAlign: 'center', width: '15%' }}>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{students.map((student,index)=>(
+<tr key={index}>
+
+<td>{student.id}</td>
+<td>{student.name}</td>
+<td>{student.month}</td>
+<td>{student.rent}</td>
+<td><span className="due">Pending</span></td>
+
+</tr>
+))}
+
+</tbody>
+
+</table>
+
+<button className="submitBtn" onClick={handlePrint} onMouseDown={(e) => e.preventDefault()}>
+Print Rent Due
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+)
+
 }
 
-export default ViewRent;
+export default PublishRent;

@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout";
 import AttendanceModal from "../../components/AttendanceModal";
 
-const API = "https://mess-management-system-q6us.onrender.com";
+const API = "http://localhost:8000";
+//const API = "https://mess-management-system-q6us.onrender.com";
 
 const today        = new Date().toISOString().split("T")[0];
 const currentMonth = new Date().toISOString().slice(0, 7);
@@ -31,9 +32,10 @@ export default function Dashboard() {
           fetch(`${API}/api/balance/${currentMonth}`),
         ]);
         const studData = await studRes.json();
+        const hostelInmates = studData.filter(s => s.room && s.room.trim() !== "");
         const expData  = await expRes.json();
         const balData  = balRes.ok ? await balRes.json() : {};
-        setStudents(studData);
+        setStudents(hostelInmates);
         setExpenses(expData);
         setBalance({
           prevBalance:    balData?.prevBalance    || 0,

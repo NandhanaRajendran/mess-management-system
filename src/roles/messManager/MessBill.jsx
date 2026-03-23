@@ -4,8 +4,8 @@ import AlertToast from "../../components/Alerttoast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-//const API = "http://localhost:8000";
-const API = "https://mess-management-system-q6us.onrender.com";
+const API = "http://localhost:8000";
+//const API = "https://mess-management-system-q6us.onrender.com";
 
 // ─── MODERN SELECT (inline, no separate file) ──────────────
 function ModernSelect({ value, onChange, options, style, disabled }) {
@@ -195,7 +195,8 @@ export default function MessBill() {
         const balanceData = balanceRes.ok ? await balanceRes.json() : {};
         const billData = billStatusRes.ok ? await billStatusRes.json() : {};
 
-        setAllStudents(studentsData);
+        const hostelInmates = studentsData.filter(s => s.room && s.room.trim() !== "");
+        setAllStudents(hostelInmates);
         setExpenses(expensesData);
         setBalance({
           prevBalance: balanceData?.prevBalance || 0,

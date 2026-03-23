@@ -9,7 +9,7 @@ const Due = require("../models/Due");
 
 exports.createStudent = async (req, res) => {
   try {
-    const { name, admissionNo, department, className, batch, email } = req.body;
+    const { name, admissionNo, department, className, batch, email, room } = req.body;
 
     //console.log("Incoming body: ",req.body);
 
@@ -36,6 +36,7 @@ exports.createStudent = async (req, res) => {
       className,
       batch,
       email,
+      room,
     });
 
     await generateDuesForStudent(student);

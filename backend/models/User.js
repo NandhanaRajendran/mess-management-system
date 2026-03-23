@@ -24,7 +24,12 @@ const userSchema = new mongoose.Schema(
         "staffAdvisor",
         "messManager",
         "principal",
+<<<<<<< HEAD
         "feeManager"
+=======
+        "feeManager",
+        "hostelManager"
+>>>>>>> af93134 (Hostel section connected with admin and mess manager)
       ],
       required: true,
     },
@@ -32,13 +37,13 @@ const userSchema = new mongoose.Schema(
     refId: {
       type: mongoose.Schema.Types.ObjectId,
       required: function () {
-        return !["admin","principal","messManager"].includes(this.role);
+        return !["admin", "principal", "messManager", "hostelManager"].includes(this.role);
       },
     },
     refModel: {
       type: String,
       required: function () {
-        return !["admin","principal","messManager"].includes(this.role);
+        return !["admin", "principal", "messManager", "hostelManager"].includes(this.role);
       },
     },
   },
