@@ -13,7 +13,7 @@ const StaffAdvisorDashboard = () => {
   const user = userContext.profile || userContext;
 
   const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });

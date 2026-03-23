@@ -80,7 +80,6 @@ function Enrollment() {
     const formData = new FormData(e.target);
     const admission = formData.get("admission"); // or Faculty ID
     const room = formData.get("room");
-    const enrollmentDate = formData.get("enrollmentDate");
 
     if (category === "Inmate type") {
       setMessage("Error: Please select a valid Inmate Type.");

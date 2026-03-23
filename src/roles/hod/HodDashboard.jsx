@@ -2083,12 +2083,12 @@ export default function App() {
   const [toastVis, setToastVis] = useState(false);
   const [finesHistory, setFinesHistory] = useState([]);
   const [dueData, setDueData] = useState([]);
-  const [students, setStudents] = useState([]);
+  const [, setStudents] = useState([]);
   const [feeData, setFeeData] = useState({ S2: [], S4: [], S6: [], S8: [] });
   const [deptName, setDeptName] = useState("");
   const [loading, setLoading] = useState(true);
   const [sems, setSems] = useState([]);
-  const [depts, setDepts] = useState([]);
+  const [, setDepts] = useState([]);
   const [allStudents, setAllStudents] = useState([]);
 
   const navigate = useNavigate();
@@ -2121,7 +2121,7 @@ export default function App() {
     const fetchAll = async () => {
       try {
         const token = sessionStorage.getItem("token");
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        JSON.parse(atob(token.split(".")[1]));
 
         // ── 1. HOD's own students ──
         const studRes = await fetch(`${BASE}/hod-students`, {

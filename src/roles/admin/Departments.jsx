@@ -9,13 +9,10 @@ import {
   PlusCircle,
 } from "lucide-react";
 import "../../styles/admin.css";
-import { useDepartments } from "../../context/DepartmentContext";
-
 const ALL_SEMESTERS = ["S1", "S3", "S5", "S7"];
 
 export default function Departments() {
   const [facultyList, setFacultyList] = useState([]);
-  const { updateDepartment } = useDepartments();
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ name: "" });
   const [advisorPopup, setAdvisorPopup] = useState(null); // { deptId, semester }

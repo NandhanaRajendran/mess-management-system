@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 
 export function Navbar({ onAvatarClick }) {
   const navigate = useNavigate();
-  const name = sessionStorage.getItem("name");
   const profile = JSON.parse(sessionStorage.getItem("profile"));
 
   const w = useWindowWidth();
