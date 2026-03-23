@@ -24,12 +24,8 @@ const userSchema = new mongoose.Schema(
         "staffAdvisor",
         "messManager",
         "principal",
-<<<<<<< HEAD
-        "feeManager"
-=======
         "feeManager",
         "hostelManager"
->>>>>>> af93134 (Hostel section connected with admin and mess manager)
       ],
       required: true,
     },

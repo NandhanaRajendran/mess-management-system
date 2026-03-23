@@ -62,12 +62,9 @@ export default function LoginPage() {
         case "feeManager":
           navigate("/fee/dashboard");
           break;
-<<<<<<< HEAD
-=======
         case "hostelManager":
           navigate("/hostel/dashboard");
           break;
->>>>>>> af93134 (Hostel section connected with admin and mess manager)
         default:
           navigate("/");
       }

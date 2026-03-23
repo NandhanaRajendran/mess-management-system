@@ -75,8 +75,6 @@ router.get("/fee-sections", getAllFeeSections);
 router.post("/update-fee-section", updateFeeSection);
 router.delete("/delete-fee-section", deleteFeeSectionById);
 
-<<<<<<< HEAD
-=======
 const Faculty = require("../models/Faculty");
 router.get("/faculty/id/:facultyId", async (req, res) => {
   try {
@@ -88,5 +86,4 @@ router.get("/faculty/id/:facultyId", async (req, res) => {
   }
 });
 
->>>>>>> af93134 (Hostel section connected with admin and mess manager)
 module.exports = router;
