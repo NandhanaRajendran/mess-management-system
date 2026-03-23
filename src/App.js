@@ -33,6 +33,7 @@ import Hod from "./roles/hod/HodDashboard";
 import Student from "./roles/student/StudentDashboard";
 import Pta from "./roles/pta/PTADashboard";
 import Staffadvisor from "./roles/staffAdvisor/StaffAdvisorDashboard";
+import FeeSectionDashboard from "./roles/feeSection/feeSectionDashboard"
 
 
 
@@ -60,6 +61,7 @@ function App() {
 
         <Route path="/pta/dashboard" element = {<Pta/>} />
         <Route path="staffadvisor/dashboard" element = {<Staffadvisor/>}/>
+        <Route path="/fee/dashboard" element={<FeeSectionDashboard />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />

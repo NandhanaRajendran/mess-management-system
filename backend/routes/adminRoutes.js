@@ -1,44 +1,47 @@
 const express = require("express");
 const router = express.Router();
 
-const { 
-    createStudent, 
-    clearDatabase, 
-    addFaculty, 
-    createDepartment, 
-    assignAdvisor, 
-    createFeeSection, 
-    getStudentDues, 
-    getAllStudents, 
-    deleteStudent, 
-    getMyDues,
-    getAdvisorDues,
-    getHodDues,
-    getHodStudents,
-    getHodDueSheet,
-    approveFine,
-    getFeeSectionDues,
-    resetPassword,
-    getAllFaculty,
-    getAllDepartments,
-    assignHod,
-    deleteFaculty, 
-    updateDepartment,
-    addFine,
-    deleteFine,
-    createPrincipal,
-    updateUserRole, } = require("../controllers/adminController");
+const {
+  createStudent,
+  clearDatabase,
+  addFaculty,
+  createDepartment,
+  assignAdvisor,
+  createFeeSection,
+  getStudentDues,
+  getAllStudents,
+  deleteStudent,
+  getMyDues,
+  getAdvisorDues,
+  getHodDues,
+  getHodStudents,
+  getHodDueSheet,
+  approveFine,
+  getFeeSectionDues,
+  resetPassword,
+  getAllFaculty,
+  getAllDepartments,
+  assignHod,
+  deleteFaculty,
+  updateDepartment,
+  addFine,
+  deleteFine,
+  createPrincipal,
+  updateUserRole,
+  getAllFeeSections,
+  updateFeeSection,
+  deleteFeeSectionById,
+} = require("../controllers/adminController");
 
 const auth = require("../middleware/auth");
 
 const Department = require("../models/Department");
-router.get("/departments",async(req,res) => {
-  try{
+router.get("/departments", async (req, res) => {
+  try {
     const departments = await Department.find();
     res.json(departments);
-
-  }catch (err) {
-    res.status(500).json({error:err.message});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -59,15 +62,17 @@ router.get("/hod-due-sheet", auth, getHodDueSheet);
 router.post("/approve-fine", auth, approveFine);
 router.get("/fee-dues", auth, getFeeSectionDues);
 router.put("/reset-password", resetPassword);
-router.get("/faculty",getAllFaculty);
-router.get("/departments",getAllDepartments);
-router.post("/assign-hod",assignHod);
-router.post("/delete-faculty",deleteFaculty);
-router.post("/update-department",updateDepartment);
+router.get("/faculty", getAllFaculty);
+router.get("/departments", getAllDepartments);
+router.post("/assign-hod", assignHod);
+router.post("/delete-faculty", deleteFaculty);
+router.post("/update-department", updateDepartment);
 router.post("/add-fine", auth, addFine);
 router.delete("/delete-fine", auth, deleteFine);
-router.post("/create-principal",createPrincipal);
-router.put("/update-role",updateUserRole);
-
+router.post("/create-principal", createPrincipal);
+router.put("/update-role", updateUserRole);
+router.get("/fee-sections", getAllFeeSections);
+router.post("/update-fee-section", updateFeeSection);
+router.delete("/delete-fee-section", deleteFeeSectionById);
 
 module.exports = router;

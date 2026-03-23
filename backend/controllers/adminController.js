@@ -364,38 +364,36 @@ exports.assignAdvisor = async (req, res) => {
 
 exports.createFeeSection = async (req, res) => {
   try {
-    const { name, applicableDepartments, permissions } = req.body;
+    const { name, category, responsibleStaff, applicableDepartments, permissions } = req.body;
 
-    // convert department names → ObjectIds
-    const departments = await Department.find({
-      name: { $in: applicableDepartments },
-    });
+    const departments = await Department.find({ _id: { $in: applicableDepartments } });
+    const deptIds = departments.map(d => d._id);
 
-    const deptIds = departments.map((d) => d._id);
+    const password = generatePassword();
+    const username = `fee_${name.toLowerCase().replace(/\s+/g, "_")}`;
 
     const feeSection = await FeeSection.create({
       name,
+      category: category || null,
+      responsibleStaff: responsibleStaff || null,
       applicableDepartments: deptIds,
-      permissions,
+      permissions: permissions || { canAddFee: true, canViewDues: true },
+      username,  // ✅ save on document
+      password,  // ✅ save on document
     });
 
-    // 🔐 create login for fee section
-    const password = generatePassword();
-
     await User.create({
-      username: `fee_${name.toLowerCase().replace(/\s+/g, "_")}`,
+      username,
       password,
-      role: "messManager",
+      role: "feeManager",
       refId: feeSection._id,
       refModel: "FeeSection",
     });
 
     res.status(201).json({
       message: "Fee section created successfully",
-      credentials: {
-        username: `fee_${name.toLowerCase().replace(/\s+/g, "_")}`,
-        password,
-      },
+      credentials: { username, password },
+      feeSection,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -902,6 +900,63 @@ exports.updateUserRole = async (req, res) => {
 
     res.json({ message: "Role updated successfully", user });
 
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ── Add these to adminController.js ──
+
+// GET all fee sections (for admin page)
+exports.getAllFeeSections = async (req, res) => {
+  try {
+    const sections = await FeeSection.find()
+      .populate("applicableDepartments", "name");
+    res.json(sections);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// UPDATE fee section (name, category, departments)
+exports.updateFeeSection = async (req, res) => {
+  try {
+    const { feeSectionId, name, category, responsibleStaff, applicableDepartments } = req.body;
+
+    const section = await FeeSection.findById(feeSectionId);
+    if (!section) return res.status(404).json({ message: "Fee section not found" });
+
+    if (name) section.name = name;
+    if (category !== undefined) section.category = category;
+    if (responsibleStaff !== undefined) section.responsibleStaff = responsibleStaff;
+    if (applicableDepartments) section.applicableDepartments = applicableDepartments;
+
+    await section.save();
+
+    const populated = await FeeSection.findById(section._id)
+      .populate("applicableDepartments", "name");
+
+    res.json({ message: "Updated successfully", feeSection: populated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// DELETE fee section
+exports.deleteFeeSectionById = async (req, res) => {
+  try {
+    const { feeSectionId } = req.body;
+
+    const section = await FeeSection.findById(feeSectionId);
+    if (!section) return res.status(404).json({ message: "Fee section not found" });
+
+    // delete related user login
+    await User.deleteOne({ refId: section._id, refModel: "FeeSection" });
+
+    // delete the fee section
+    await FeeSection.findByIdAndDelete(feeSectionId);
+
+    res.json({ message: "Fee section deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

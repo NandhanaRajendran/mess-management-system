@@ -59,6 +59,9 @@ export default function LoginPage() {
         case "principal":
           navigate("/principal-dashboard");
           break;
+        case "feeManager":
+          navigate("/fee/dashboard");
+          break;
         default:
           navigate("/");
       }

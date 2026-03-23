@@ -6,7 +6,7 @@ const PrincipalDashboard = () => {
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [semester,setSemester] = useState("");
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("");
   const navigate = useNavigate();
@@ -109,7 +109,7 @@ const PrincipalDashboard = () => {
             <option value="Robotics">Robotics</option>
           </select>
 
-<<<<<<< HEAD
+
           <select
             value={semester}
             onChange={(e) => setSemester(e.target.value)}
@@ -125,8 +125,7 @@ const PrincipalDashboard = () => {
             <option value="8">S8</option>
           </select>
 
-=======
->>>>>>> 050060904fd34fd0ee851169c3174498aeaaf6ea
+
         </div>
 
         {/* TABLE */}

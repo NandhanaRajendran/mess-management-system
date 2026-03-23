@@ -35,6 +35,7 @@ const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use("/api/fee-section", require("./routes/feeSectionRoutes"));
 app.use("/api/balance", require("./routes/balance"));
 app.use("/api/bill", require("./routes/bill"));
 app.use("/api/staff-attendance", require("./routes/staffAttendance"));

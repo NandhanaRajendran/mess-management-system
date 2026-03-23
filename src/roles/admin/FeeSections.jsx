@@ -1,130 +1,199 @@
-import { useState } from "react";
-import { Plus, Pencil, Trash2, X, Check, ChevronDown, UserCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Check,
+  ChevronDown,
+  UserCircle2,
+} from "lucide-react";
 import "../../styles/admin.css";
 
-const CATEGORY_OPTIONS = ["Academic", "Accommodation", "Extra-curricular", "Transport"];
-
-const initialFeeSections = [
-  {
-    id: 1,
-    name: "Accreditation Fee",
-    category: "Academic",
-    responsibleStaff: "PTA Staff",
-    username: "fee_tuition",
-    password: "fee@tui123",
-  },
-  {
-    id: 2,
-    name: "Hostel Fee",
-    category: "Accommodation",
-    responsibleStaff: "Clerk",
-    username: "fee_hostel",
-    password: "fee@hos123",
-  },
-  {
-    id: 3,
-    name: "Lab Fee",
-    category: "Academic",
-    responsibleStaff: "Hod",
-    username: "fee_lab",
-    password: "fee@lab123",
-  },
-  {
-    id: 4,
-    name: "Mess bill",
-    category: "Hostel",
-    responsibleStaff: "Mess secretary",
-    username: "mess-sec",
-    password: "fee@mess123",
-  },
-  {
-    id: 5,
-    name: "Library Fee",
-    category: "Academic",
-    responsibleStaff: "Librarian",
-    username: "fee_library",
-    password: "fee@lib123",
-  },
-  
-];
+const BASE = "http://localhost:8000/api/admin";
 
 const categoryColor = (cat) => {
   switch (cat) {
-    case "Academic":         return { bg: "#dcfce7", color: "#15803d" };
-    case "Accommodation":    return { bg: "#dbeafe", color: "#1d4ed8" };
-    case "Extra-curricular": return { bg: "#fef9c3", color: "#854d0e" };
-    case "Transport":        return { bg: "#fce7f3", color: "#9d174d" };
-    default:                 return { bg: "#f1f5f9", color: "#475569" };
+    case "Academic":
+      return { bg: "#dcfce7", color: "#15803d" };
+    case "Accommodation":
+      return { bg: "#dbeafe", color: "#1d4ed8" };
+    case "Extra-curricular":
+      return { bg: "#fef9c3", color: "#854d0e" };
+    case "Transport":
+      return { bg: "#fce7f3", color: "#9d174d" };
+    case "Hostel":
+      return { bg: "#ede9fe", color: "#6d28d9" };
+    default:
+      return { bg: "#f1f5f9", color: "#475569" };
   }
 };
 
-export default function FeeSections() {
-  const [sections, setSections]   = useState(initialFeeSections);
-  const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [openPicker, setOpenPicker] = useState(null); // "category" | null
+const CATEGORY_OPTIONS = [
+  "Academic",
+  "Accommodation",
+  "Extra-curricular",
+  "Transport",
+  "Hostel",
+];
 
+export default function FeeSections() {
+  const [sections, setSections] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editingSection, setEditingSection] = useState(null);
+  const [openPicker, setOpenPicker] = useState(null); // "category" | "dept"
+  const [newCredentials, setNewCredentials] = useState({}); // { [sectionId]: {username, password} }
   const [formData, setFormData] = useState({
     name: "",
     category: "",
-    responsibleStaff: "",
+    responsibleStaff: "", // ✅
+    applicableDepartments: [],
   });
 
+  // ── Fetch fee sections ──
+  useEffect(() => {
+    fetch(`${BASE}/fee-sections`)
+      .then((r) => r.json())
+      .then((data) => setSections(data))
+      .catch(console.error);
+  }, []);
+
+  // ── Fetch departments ──
+  useEffect(() => {
+    fetch(`${BASE}/departments`)
+      .then((r) => r.json())
+      .then((data) => setDepartments(data))
+      .catch(console.error);
+  }, []);
+
   const openCreate = () => {
-    setEditingId(null);
-    setFormData({ name: "", category: "", responsibleStaff: "" });
+    setEditingSection(null);
+    setFormData({ name: "", category: "", applicableDepartments: [] });
     setOpenPicker(null);
     setShowModal(true);
   };
 
   const openEdit = (section) => {
-    setEditingId(section.id);
+    setEditingSection(section);
     setFormData({
       name: section.name,
-      category: section.category,
-      responsibleStaff: section.responsibleStaff,
+      category: section.category || "",
+      responsibleStaff: section.responsibleStaff || "", // ✅
+      applicableDepartments: (section.applicableDepartments || []).map(
+        (d) => d._id || d,
+      ),
     });
     setOpenPicker(null);
     setShowModal(true);
   };
 
-  const handleDelete = (id) =>
-    setSections(sections.filter((s) => s.id !== id));
+  const toggleDept = (deptId) => {
+    setFormData((prev) => ({
+      ...prev,
+      applicableDepartments: prev.applicableDepartments.includes(deptId)
+        ? prev.applicableDepartments.filter((id) => id !== deptId)
+        : [...prev.applicableDepartments, deptId],
+    }));
+  };
 
-  const handleSave = () => {
-    if (!formData.name || !formData.category || !formData.responsibleStaff) {
-      alert("All fields are required");
+  const handleSave = async () => {
+    if (!formData.name) {
+      alert("Fee section name is required");
+      return;
+    }
+    if (formData.applicableDepartments.length === 0) {
+      alert("Please select at least one applicable department");
       return;
     }
 
-    if (editingId) {
-      setSections(sections.map((s) =>
-        s.id === editingId ? { ...s, ...formData } : s
-      ));
-    } else {
-      const slug = formData.name.toLowerCase().replace(/\s+/g, "_");
-      setSections([
-        ...sections,
-        {
-          id: Date.now(),
-          ...formData,
-          username: `fee_${slug}`,
-          password: `fee@${slug.slice(0, 3)}123`,
-        },
-      ]);
-    }
+    try {
+      if (editingSection) {
+        // ── Update ──
+        const res = await fetch(`${BASE}/update-fee-section`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            feeSectionId: editingSection._id,
+            name: formData.name,
+            category: formData.category,
+            responsibleStaff: formData.responsibleStaff, // ✅ moved here
+            applicableDepartments: formData.applicableDepartments,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.message || "Update failed");
+        setSections((prev) =>
+          prev.map((s) => (s._id === editingSection._id ? data.feeSection : s)),
+        );
+        alert("Updated successfully ✅");
+      } else {
+        // ── Create ──
+        const res = await fetch(`${BASE}/create-fee-section`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.name,
+            category: formData.category,
+            responsibleStaff: formData.responsibleStaff, // ✅ moved here
+            applicableDepartments: formData.applicableDepartments,
+            permissions: { canAddFee: true, canViewDues: true },
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) return alert(data.message || "Creation failed");
 
-    setShowModal(false);
+        const refreshed = await fetch(`${BASE}/fee-sections`).then((r) =>
+          r.json(),
+        );
+        setSections(refreshed);
+
+        if (data.credentials) {
+          alert(
+            `Fee Section Created!\nUsername: ${data.credentials.username}\nPassword: ${data.credentials.password}`,
+          );
+          const newSection = refreshed.find((s) => s.name === formData.name);
+          if (newSection) {
+            setNewCredentials((prev) => ({
+              ...prev,
+              [newSection._id]: data.credentials,
+            }));
+          }
+        }
+      }
+
+      setShowModal(false); 
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
   };
+  const handleDelete = async (sectionId) => {
+    if (!window.confirm("Delete this fee section? This cannot be undone."))
+      return;
+    try {
+      const res = await fetch(`${BASE}/delete-fee-section`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ feeSectionId: sectionId }),
+      });
+      const data = await res.json();
+      if (!res.ok) return alert(data.message || "Delete failed");
+      setSections((prev) => prev.filter((s) => s._id !== sectionId));
+    } catch {
+      alert("Delete failed");
+    }
+  };
+
+  const getDeptName = (id) => departments.find((d) => d._id === id)?.name || id;
 
   return (
     <div className="fee-page">
-
       {/* HEADER */}
       <div className="students-header">
         <div>
           <h1>Fee Section Management</h1>
-          <p>Manage fee categories and assign responsible staff</p>
+          <p>Create fee sections and assign applicable departments</p>
         </div>
         <button className="add-student-btn" onClick={openCreate}>
           <Plus size={16} /> Create Fee Section
@@ -133,11 +202,16 @@ export default function FeeSections() {
 
       {/* GRID */}
       <div className="fee-grid">
+        {sections.length === 0 && (
+          <p style={{ color: "#94a3b8", gridColumn: "1/-1" }}>
+            No fee sections yet. Create one to get started.
+          </p>
+        )}
         {sections.map((s) => {
           const { bg, color } = categoryColor(s.category);
+          const creds = newCredentials[s._id];
           return (
-            <div className="fee-card" key={s.id}>
-
+            <div className="fee-card" key={s._id}>
               {/* Card top */}
               <div className="fee-card-top">
                 <div className="fee-card-title">
@@ -146,88 +220,207 @@ export default function FeeSections() {
                   </div>
                   <div>
                     <h3>{s.name}</h3>
-                    <span className="fee-category">{s.category}</span>
+                    {s.category && (
+                      <span
+                        className="fee-category"
+                        style={{ background: bg, color }}
+                      >
+                        {s.category}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="dept-actions">
-                  <Pencil size={15} className="action edit" onClick={() => openEdit(s)} />
-                  <Trash2 size={15} className="action delete" onClick={() => handleDelete(s.id)} />
+                  <Pencil
+                    size={15}
+                    className="action edit"
+                    onClick={() => openEdit(s)}
+                  />
+                  <Trash2
+                    size={15}
+                    className="action delete"
+                    onClick={() => handleDelete(s._id)}
+                  />
                 </div>
               </div>
 
-              
-
-              {/* Responsible staff */}
-              <div className="fee-section-row" style={{ marginTop: "10px" }}>
-                <span className="fee-label">RESPONSIBLE STAFF</span>
-                <p className="fee-staff-name">{s.responsibleStaff}</p>
+              {/* Applicable Departments */}
+              <div className="fee-section-row" style={{ marginTop: 12 }}>
+                <span className="fee-label">APPLICABLE DEPARTMENTS</span>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    marginTop: 6,
+                  }}
+                >
+                  {(s.applicableDepartments || []).length === 0 ? (
+                    <span style={{ fontSize: ".78rem", color: "#94a3b8" }}>
+                      None
+                    </span>
+                  ) : (
+                    (s.applicableDepartments || []).map((d) => (
+                      <span
+                        key={d._id || d}
+                        style={{
+                          background: "#f1f5f9",
+                          color: "#334155",
+                          borderRadius: 12,
+                          padding: "2px 10px",
+                          fontSize: ".72rem",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {d.name || getDeptName(d)}
+                      </span>
+                    ))
+                  )}
+                </div>
               </div>
 
               {/* Credentials */}
-              <div className="fee-credentials">
-                <span className="fee-label">STAFF LOGIN CREDENTIALS</span>
-                <div className="fee-creds-box">
-                  <span>Username: {s.username}</span>
-                  <span>Password: {s.password}</span>
+              <div className="fee-credentials" style={{ marginTop: 12 }}>
+                <span className="fee-label">LOGIN CREDENTIALS</span>
+                <div className="login-box">
+                  <div>
+                    <span>Username</span>
+                    <p>{creds?.username || s.username || "-"}</p>
+                  </div>
+                  <div>
+                    <span>Password</span>
+                    <p>{creds?.password || s.password || "-"}</p>
+                  </div>
                 </div>
               </div>
-
             </div>
           );
         })}
       </div>
 
-      {/* ── ADD / EDIT MODAL ── */}
+      {/* ── CREATE / EDIT MODAL ── */}
       {showModal && (
         <div className="modal-overlay">
-          <div className="modal">
+          <div className="modal" style={{ maxWidth: 480 }}>
             <div className="modal-header">
-              <h3>{editingId ? "Edit Fee Section" : "Create Fee Section"}</h3>
+              <h3>
+                {editingSection ? "Edit Fee Section" : "Create Fee Section"}
+              </h3>
               <button className="close-btn" onClick={() => setShowModal(false)}>
                 <X size={18} />
               </button>
             </div>
 
             <div className="modal-body">
-
-              <label>Fee Section Name</label>
+              <label>Fee Section Name *</label>
               <input
-                placeholder="e.g. Transport Fee"
+                placeholder="e.g. Tuition Fee"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+              <label style={{ marginTop: 12 }}>Responsible Staff</label>
+              <input
+                placeholder="e.g. Clerk, JS, SS, Librarian"
+                value={formData.responsibleStaff}
+                onChange={(e) =>
+                  setFormData({ ...formData, responsibleStaff: e.target.value })
+                }
               />
 
-              <label>Category</label>
+              <label style={{ marginTop: 12 }}>Category</label>
               <button
                 className="modal-dept-trigger"
                 type="button"
-                onClick={() => setOpenPicker(openPicker === "category" ? null : "category")}
+                onClick={() =>
+                  setOpenPicker(openPicker === "category" ? null : "category")
+                }
               >
-                <span style={{ color: formData.category ? "#374151" : "#9ca3af" }}>
-                  {formData.category || "Select Category"}
+                <span
+                  style={{ color: formData.category ? "#374151" : "#9ca3af" }}
+                >
+                  {formData.category || "Select Category (optional)"}
                 </span>
                 <ChevronDown size={14} />
               </button>
 
-              <label>Responsible Staff Name</label>
-              <input
-                placeholder="Enter staff name"
-                value={formData.responsibleStaff}
-                onChange={(e) => setFormData({ ...formData, responsibleStaff: e.target.value })}
-              />
+              <label style={{ marginTop: 12 }}>Applicable Departments *</label>
+              <button
+                className="modal-dept-trigger"
+                type="button"
+                onClick={() =>
+                  setOpenPicker(openPicker === "dept" ? null : "dept")
+                }
+              >
+                <span
+                  style={{
+                    color: formData.applicableDepartments.length
+                      ? "#374151"
+                      : "#9ca3af",
+                  }}
+                >
+                  {formData.applicableDepartments.length > 0
+                    ? `${formData.applicableDepartments.length} department(s) selected`
+                    : "Select departments"}
+                </span>
+                <ChevronDown size={14} />
+              </button>
 
-              {editingId && (
-                <small style={{ color: "#64748b" }}>
-                  Login credentials are auto-generated and cannot be edited here.
-                </small>
+              {/* Selected dept chips */}
+              {formData.applicableDepartments.length > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    marginTop: 8,
+                  }}
+                >
+                  {formData.applicableDepartments.map((id) => (
+                    <span
+                      key={id}
+                      style={{
+                        background: "#e0f2fe",
+                        color: "#0369a1",
+                        borderRadius: 12,
+                        padding: "2px 10px",
+                        fontSize: ".72rem",
+                        fontWeight: 600,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      {getDeptName(id)}
+                      <X
+                        size={10}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => toggleDept(id)}
+                      />
+                    </span>
+                  ))}
+                </div>
               )}
 
+              {editingSection && (
+                <small
+                  style={{ color: "#64748b", display: "block", marginTop: 10 }}
+                >
+                  Login credentials cannot be changed after creation.
+                </small>
+              )}
             </div>
 
             <div className="modal-footer">
-              <button className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+              <button
+                className="cancel-btn"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
               <button className="submit-btn" onClick={handleSave}>
-                {editingId ? "Save Changes" : "Create"}
+                {editingSection ? "Save Changes" : "Create"}
               </button>
             </div>
           </div>
@@ -236,7 +429,11 @@ export default function FeeSections() {
 
       {/* ── CATEGORY PICKER ── */}
       {openPicker === "category" && (
-        <div className="modal-overlay" style={{ zIndex: 3000 }} onClick={() => setOpenPicker(null)}>
+        <div
+          className="modal-overlay"
+          style={{ zIndex: 3000 }}
+          onClick={() => setOpenPicker(null)}
+        >
           <div className="filter-popup" onClick={(e) => e.stopPropagation()}>
             <div className="filter-popup-header">
               <h3>Select Category</h3>
@@ -251,9 +448,23 @@ export default function FeeSections() {
                   <button
                     key={cat}
                     className={`filter-popup-option${formData.category === cat ? " selected" : ""}`}
-                    onClick={() => { setFormData((p) => ({ ...p, category: cat })); setOpenPicker(null); }}
+                    onClick={() => {
+                      setFormData((p) => ({ ...p, category: cat }));
+                      setOpenPicker(null);
+                    }}
                   >
-                    <span className="fee-cat-pill" style={{ background: bg, color }}>{cat}</span>
+                    <span
+                      style={{
+                        background: bg,
+                        color,
+                        borderRadius: 12,
+                        padding: "2px 10px",
+                        fontSize: ".72rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {cat}
+                    </span>
                     {formData.category === cat && <Check size={14} />}
                   </button>
                 );
@@ -263,6 +474,56 @@ export default function FeeSections() {
         </div>
       )}
 
+      {/* ── DEPT PICKER (multi-select) ── */}
+      {openPicker === "dept" && (
+        <div
+          className="modal-overlay"
+          style={{ zIndex: 3000 }}
+          onClick={() => setOpenPicker(null)}
+        >
+          <div className="filter-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="filter-popup-header">
+              <h3>Select Departments</h3>
+              <button className="close-btn" onClick={() => setOpenPicker(null)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="filter-popup-list">
+              {departments.map((d) => {
+                const isSelected = formData.applicableDepartments.includes(
+                  d._id,
+                );
+                return (
+                  <button
+                    key={d._id}
+                    className={`filter-popup-option${isSelected ? " selected" : ""}`}
+                    onClick={() => toggleDept(d._id)}
+                  >
+                    <span>{d.name}</span>
+                    {isSelected && <Check size={14} />}
+                  </button>
+                );
+              })}
+              {departments.length === 0 && (
+                <p style={{ color: "#94a3b8", padding: "12px 16px" }}>
+                  No departments found
+                </p>
+              )}
+            </div>
+            <div
+              style={{ padding: "12px 16px", borderTop: "1px solid #e2e8f0" }}
+            >
+              <button
+                className="submit-btn"
+                style={{ width: "100%" }}
+                onClick={() => setOpenPicker(null)}
+              >
+                Done ({formData.applicableDepartments.length} selected)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

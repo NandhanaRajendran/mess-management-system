@@ -23,7 +23,8 @@ const userSchema = new mongoose.Schema(
         "hod",
         "staffAdvisor",
         "messManager",
-        "principal"
+        "principal",
+        "feeManager"
       ],
       required: true,
     },
