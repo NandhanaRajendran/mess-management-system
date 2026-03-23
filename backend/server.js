@@ -10,7 +10,7 @@ const app = express();
 connectDB();
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: ["http://localhost:3000", "http://localhost:3001", "https://mess-sec-page.netlify.app"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
