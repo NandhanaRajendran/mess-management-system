@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout";
 import AttendanceModal from "../../components/AttendanceModal";
 
-const API = "http://localhost:8000";
-//const API = "https://mess-management-system-q6us.onrender.com";
+//const API = "http://localhost:8000";
+const API = "https://mess-management-system-q6us.onrender.com";
 
 const today        = new Date().toISOString().split("T")[0];
 const currentMonth = new Date().toISOString().slice(0, 7);
