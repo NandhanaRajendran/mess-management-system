@@ -28,6 +28,11 @@ const studentSchema = new mongoose.Schema(
     batch: {
       type: String, // Example: 2024-2028
     },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other"],
+      default: "Other"
+    },
 
     email: {
       type: String,

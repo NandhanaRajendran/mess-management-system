@@ -31,6 +31,8 @@ const {
   getAllFeeSections,
   updateFeeSection,
   deleteFeeSectionById,
+  getDashboardData,
+  updateStudent,
 } = require("../controllers/adminController");
 
 const auth = require("../middleware/auth");
@@ -47,6 +49,7 @@ router.get("/departments", async (req, res) => {
 
 router.delete("/clear", clearDatabase);
 router.post("/add-student", createStudent);
+router.put("/update-student", updateStudent);
 router.post("/add-faculty", addFaculty);
 router.post("/add-department", createDepartment);
 router.post("/assign-advisor", assignAdvisor);
@@ -74,6 +77,7 @@ router.put("/update-role", updateUserRole);
 router.get("/fee-sections", getAllFeeSections);
 router.post("/update-fee-section", updateFeeSection);
 router.delete("/delete-fee-section", deleteFeeSectionById);
+router.get("/dashboard-data", getDashboardData);
 
 const Faculty = require("../models/Faculty");
 router.get("/faculty/id/:facultyId", async (req, res) => {

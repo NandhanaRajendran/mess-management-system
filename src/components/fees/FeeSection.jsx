@@ -1,5 +1,12 @@
 import React, { useState, useMemo } from "react";
 
+const styleTag = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+
 /* ── colour tokens (inline so no external dep needed) ── */
 const C = {
   white: "#fff", bg: "#f8fafc", border: "#e2e8f0", border2: "#cbd5e1",
@@ -9,6 +16,7 @@ const C = {
   gold: "#d97706", goldBg: "#fffbeb", goldBorder: "#fde68a",
   red: "#dc2626", redBg: "#fef2f2", redBorder: "#fecaca",
   orange: "#ea580c",
+  tooltipBg: "rgba(15,23,42,.92)",
 };
 
 const CAT_STYLE = {
@@ -167,7 +175,25 @@ function FeeRowDesktop({ f, isLast, onPayNow }) {
   return (
     <tr onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
       style={{ background:hov?C.bg:C.white, transition:"background .15s" }}>
-      <td style={td}><span style={{ fontWeight:700, fontSize:13.5, color:C.text }}>{f.type}</span></td>
+      <td style={td}>
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <span style={{ fontWeight:700, fontSize:13.5, color:C.text, cursor: f.remark ? "help" : "default" }}>
+            {f.type}
+          </span>
+          {f.remark && hov && (
+            <div style={{
+              position: "absolute", bottom: "100%", left: "0", marginBottom: 8,
+              background: C.tooltipBg, color: "#fff", padding: "6px 12px", borderRadius: 8,
+              fontSize: 11, fontWeight: 500, width: "max-content", maxWidth: 200,
+              boxShadow: "0 4px 12px rgba(0,0,0,.15)", zIndex: 50, pointerEvents: "none",
+              animation: "fadeIn .2s ease"
+            }}>
+              <div style={{ fontWeight: 700, marginBottom: 2, fontSize: 10, color: C.accent }}>HOD REMARK:</div>
+              {f.remark}
+            </div>
+          )}
+        </div>
+      </td>
       <td style={td}><CatPill cat={f.cat} /></td>
       <td style={td}><span style={{ fontSize:14, fontWeight:800, color:C.text }}>{fmtCurrency(f.amt)}</span></td>
       <td style={td}><span style={{ fontSize:12.5, color:C.text2, fontWeight:500 }}>{f.pub}</span></td>
@@ -202,7 +228,14 @@ function FeeCardMobile({ f, onPayNow }) {
     <div style={{ background:C.white, border:`1.5px solid ${C.border}`, borderRadius:12, padding:16,
       display:"flex", flexDirection:"column", gap:10 }}>
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8 }}>
-        <div style={{ fontSize:14, fontWeight:700, color:C.text }}>{f.type}</div>
+        <div style={{ position: "relative" }}>
+          <div style={{ fontSize:14, fontWeight:700, color:C.text }}>{f.type}</div>
+          {f.remark && (
+            <div style={{ fontSize:11, color:C.muted, marginTop:2, background:C.bg, padding:"3px 8px", borderRadius:6, border:`1px solid ${C.border}` }}>
+              💡 {f.remark}
+            </div>
+          )}
+        </div>
         <StatusBadge status={st} />
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
@@ -273,6 +306,7 @@ export function FeeSection({ fees, onPayNow }) {
   return (
     <div style={{ background:C.white, border:`1.5px solid ${C.border}`, borderRadius:16,
       overflow:"hidden", boxShadow:"0 1px 8px rgba(37,99,235,.07)" }}>
+      <style dangerouslySetInnerHTML={{ __html: styleTag }} />
       {/* Header */}
       <div style={{ padding:"18px 20px 14px", borderBottom:`1.5px solid ${C.border}` }}>
         <div style={{ fontSize:17, fontWeight:800, color:C.text, marginBottom:4 }}>Fee Log</div>

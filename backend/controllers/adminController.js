@@ -9,15 +9,31 @@ const Due = require("../models/Due");
 
 exports.createStudent = async (req, res) => {
   try {
-    const { name, admissionNo, department, className, batch, email, room } = req.body;
+    const { name, admissionNo, department, className, batch, email, room, gender } = req.body;
+    
+    if (!/^[a-zA-Z\s]+$/.test(name)) {
+      return res.status(400).json({ message: "Student name must contain only characters and spaces. Numbers and special characters are not allowed." });
+    }
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
 
     //console.log("Incoming body: ",req.body);
-
-    //const dept = await Department.findOne({name:department});
     const dept = await Department.findById(department);
 
     if (!dept) {
       return res.status(400).json({ message: "Department not found" });
+    }
+
+    const existingFaculty = await Faculty.findOne({ email });
+    if (existingFaculty) {
+      return res.status(400).json({ message: "Email is already in use by a faculty member" });
+    }
+
+    const existingStudentEmail = await Student.findOne({ email });
+    if (existingStudentEmail) {
+      return res.status(400).json({ message: "Email is already in use by another student" });
     }
 
     const existing = await Student.findOne({ admissionNo });
@@ -37,9 +53,10 @@ exports.createStudent = async (req, res) => {
       batch,
       email,
       room,
+      gender,
     });
 
-    await generateDuesForStudent(student);
+   // Library dues code removed
 
     try {
       // create user
@@ -50,6 +67,8 @@ exports.createStudent = async (req, res) => {
         refId: student._id,
         refModel: "Student",
       });
+
+      
     } catch (err) {
       // rollback student if user fails
       await Student.findByIdAndDelete(student._id);
@@ -72,6 +91,67 @@ exports.createStudent = async (req, res) => {
   }
 };
 
+exports.updateStudent = async (req, res) => {
+  try {
+    const { name, admissionNo, department, className, batch, email, originalAdmissionNo, gender } = req.body;
+    
+    if (name && !/^[a-zA-Z\s]+$/.test(name)) {
+      return res.status(400).json({ message: "Student name must contain only characters and spaces." });
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    if (email) {
+      const existingFaculty = await Faculty.findOne({ email });
+      if (existingFaculty) {
+          return res.status(400).json({ message: "Email is already in use by a faculty member" });
+      }
+      
+      const adminNoToCheck = originalAdmissionNo || admissionNo;
+      const existingStudentEmail = await Student.findOne({ email, admissionNo: { $ne: adminNoToCheck } });
+      if (existingStudentEmail) {
+          return res.status(400).json({ message: "Email is already in use by another student" });
+      }
+    }
+
+    const studentToUpdate = await Student.findOne({ admissionNo: originalAdmissionNo || admissionNo });
+    if (!studentToUpdate) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    if (originalAdmissionNo && admissionNo !== originalAdmissionNo) {
+      const existing = await Student.findOne({ admissionNo });
+      if (existing) {
+         return res.status(400).json({ message: "New admission number already exists" });
+      }
+      studentToUpdate.admissionNo = admissionNo;
+      
+      const userToUpdate = await User.findOne({ username: originalAdmissionNo });
+      if (userToUpdate) {
+        userToUpdate.username = admissionNo;
+        await userToUpdate.save();
+      }
+    }
+
+    studentToUpdate.name = name || studentToUpdate.name;
+    studentToUpdate.department = department || studentToUpdate.department;
+    studentToUpdate.className = className || studentToUpdate.className;
+    studentToUpdate.batch = batch || studentToUpdate.batch;
+    studentToUpdate.email = email || studentToUpdate.email;
+    studentToUpdate.gender = gender || studentToUpdate.gender;
+
+    await studentToUpdate.save();
+    
+    // populate dept to send back properly structured object
+    await studentToUpdate.populate("department", "name");
+
+    res.json({ message: "Student updated successfully", student: studentToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.clearDatabase = async (req, res) => {
   try {
     const Student = require("../models/Student");
@@ -89,6 +169,23 @@ exports.clearDatabase = async (req, res) => {
 exports.addFaculty = async (req, res) => {
   try {
     const { name, department, email, phone } = req.body;
+
+    if (!/^[a-zA-Z\s]+$/.test(name)) {
+      return res.status(400).json({ message: "Name must contain only characters and spaces" });
+    }
+
+    if (!/^\d{10}$/.test(phone)) {
+      return res.status(400).json({ message: "Phone number must be exactly 10 digits" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const existingStudent = await Student.findOne({ email });
+    if (existingStudent) {
+      return res.status(400).json({ message: "Email is already in use by a student" });
+    }
 
     const existing = await Faculty.findOne({ email });
     if (existing) {
@@ -401,21 +498,6 @@ exports.createFeeSection = async (req, res) => {
   }
 };
 
-async function generateDuesForStudent(student) {
-  // find all fee sections applicable to student's department
-  const feeSections = await FeeSection.find({
-    applicableDepartments: student.department,
-  });
-
-  for (let fee of feeSections) {
-    await Due.create({
-      student: student._id,
-      feeSection: fee._id,
-      amount: 1000, // default (can change later)
-    });
-  }
-}
-
 exports.getStudentDues = async (req, res) => {
   try {
     const { admissionNo } = req.params;
@@ -427,7 +509,7 @@ exports.getStudentDues = async (req, res) => {
 
     const dues = await Due.find({ student: student._id }).populate(
       "feeSection",
-      "name",
+      "name category",
     );
 
     res.json(dues);
@@ -464,7 +546,7 @@ exports.deleteStudent = async (req, res) => {
 exports.getMyDues = async (req, res) => {
   const dues = await Due.find({ student: req.user.refId }).populate(
     "feeSection",
-    "name",
+    "name category",
   );
 
   res.json(dues);
@@ -488,7 +570,7 @@ exports.getAdvisorDues = async (req, res) => {
 
   const dues = await Due.find({ student: { $in: ids } }).populate(
     "feeSection",
-    "name",
+    "name category",
   );
 
   res.json(dues);
@@ -520,13 +602,23 @@ exports.getHodDues = async (req, res) => {
       : { student: { $in: ownIds } };
 
     const dues = await Due.find(query)
-      .populate("feeSection", "name")
-      .populate("student", "name admissionNo className");
+      .populate("feeSection", "name category")
+      .populate({
+        path: "student",
+        select: "name admissionNo className department",
+        populate: { path: "department", select: "name" }
+      })
+      .populate({
+        path: "addedByRef",
+        select: "name department",
+        populate: { path: "department", select: "name" }
+      });
 
     const result = dues.map((d) => ({
       ...d.toObject(),
-      deptName: dept.name,
-      addedByRef: d.addedByRef?.toString(), // ✅ send as string to frontend
+      deptName: d.student?.department?.name || "Unknown",
+      addedByRef: d.addedByRef?._id?.toString(), // ✅ send as string to frontend
+      addedByDept: d.addedByRef?.department?.name || "N/A", // 🔥 add this
     }));
 
     res.json(result);
@@ -569,7 +661,22 @@ exports.getHodDueSheet = async (req, res) => {
 
     const dues = await Due.find({ student: { $in: ids } })
       .populate("student", "name admissionNo className")
-      .populate("feeSection", "name");
+      .populate("feeSection", "name category");
+
+    // Fetch all fee sections and identify which should be grouped as "Fine"
+    const allSections = await FeeSection.find({}).select("name");
+    
+    const fineSectionNames = allSections.filter(s => {
+       const ln = s.name.toLowerCase();
+       return ln.includes("hod") || ln.includes("advisor") || ln.includes("library") || ln.includes("fine");
+    }).map(s => s.name);
+
+    // Dynamic columns are everything else
+    const dynamicSections = allSections
+      .filter(s => !fineSectionNames.includes(s.name))
+      .map(s => s.name);
+
+    const columnList = [...dynamicSections, "Fine"];
 
     // Group dues by student
     const studentMap = {};
@@ -584,33 +691,26 @@ exports.getHodDueSheet = async (req, res) => {
           name: s.name,
           sem: s.className,
           dept: dept.name,
-          tuition: 0,
-          exam: 0,
-          library: 0,
-          bus: 0,
-          fine: 0,
           total: 0,
           feeCategories: [],
         };
+        // Initialize all dynamic section names to 0
+        dynamicSections.forEach(name => {
+          studentMap[key][name] = 0;
+        });
+        // Aggregated Fine column
+        studentMap[key]["Fine"] = 0;
       }
 
-      const feeName = due.feeSection?.name?.toLowerCase() || "";
       const amount = due.status === "pending" ? due.amount : 0;
 
-      if (feeName.includes("tuition")) {
-        studentMap[key].tuition += amount;
-      } else if (feeName.includes("exam")) {
-        studentMap[key].exam += amount;
-      } else if (feeName.includes("library")) {
-        studentMap[key].library += amount;
-      } else if (feeName.includes("bus") || feeName.includes("transport")) {
-        studentMap[key].bus += amount;
-      } else if (
-        feeName.includes("fine") ||
-        feeName.includes("penalty") ||
-        feeName.includes("damage")
-      ) {
-        studentMap[key].fine += amount;
+      if (fineSectionNames.includes(due.feeSection?.name)) {
+        studentMap[key]["Fine"] += amount;
+      } else if (dynamicSections.includes(due.feeSection?.name)) {
+        studentMap[key][due.feeSection.name] += amount;
+      } else {
+        // Fallback or miscellaneous — aggregate to Fine to be safe
+        studentMap[key]["Fine"] += amount;
       }
 
       if (due.status === "pending") {
@@ -622,13 +722,13 @@ exports.getHodDueSheet = async (req, res) => {
         amount: `₹${due.amount.toLocaleString("en-IN")}`,
         due: due.updatedAt ? due.updatedAt.toISOString().split("T")[0] : "-",
         status: due.status === "paid" ? "Published" : "Pending",
-        remark: "",
+        remark: due.remark || "",
       });
     });
 
     const rows = Object.values(studentMap);
 
-    // Build fee categories grouped by semester
+    // Build fee categories grouped by semester (keep existing logic for Fee categories tab)
     const feeBySem = {};
     rows.forEach((row) => {
       if (!feeBySem[row.sem]) feeBySem[row.sem] = {};
@@ -640,13 +740,17 @@ exports.getHodDueSheet = async (req, res) => {
       });
     });
 
-    // Convert to array per semester
     const feeData = {};
     Object.keys(feeBySem).forEach((sem) => {
       feeData[sem] = Object.values(feeBySem[sem]);
     });
 
-    res.json({ deptName: dept.name, rows, feeData });
+    res.json({
+      deptName: dept.name,
+      rows,
+      feeData,
+      sections: columnList // Send the list of columns to frontend
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -719,9 +823,16 @@ exports.getAllDepartments = async (req, res) => {
     const departments = await Department.find().populate(
       "hod",
       "name facultyId",
+    ).lean();
+
+    const result = await Promise.all(
+      departments.map(async (dept) => {
+        const count = await Student.countDocuments({ department: dept._id });
+        return { ...dept, students: count };
+      })
     );
 
-    res.json(departments);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -911,7 +1022,7 @@ exports.updateUserRole = async (req, res) => {
 // GET all fee sections (for admin page)
 exports.getAllFeeSections = async (req, res) => {
   try {
-    const sections = await FeeSection.find()
+    const sections = await FeeSection.find({ name: { $ne: "HOD Fine" } })
       .populate("applicableDepartments", "name");
     res.json(sections);
   } catch (err) {
@@ -958,6 +1069,37 @@ exports.deleteFeeSectionById = async (req, res) => {
     await FeeSection.findByIdAndDelete(feeSectionId);
 
     res.json({ message: "Fee section deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getDashboardData = async (req, res) => {
+  try {
+    const recentStudents = await Student.find()
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .populate("department", "name");
+
+    const recentDepartments = await Department.find()
+      .sort({ updatedAt: -1 })
+      .limit(3);
+
+    const totalStudents = await Student.countDocuments();
+    const totalDepartments = await Department.countDocuments();
+    const totalStaffAdvisors = await User.countDocuments({ role: "staffAdvisor" });
+    const totalFeeSections = await FeeSection.countDocuments();
+
+    res.json({
+      recentStudents,
+      recentDepartments,
+      stats: {
+        totalStudents,
+        totalDepartments,
+        totalStaffAdvisors,
+        totalFeeSections
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

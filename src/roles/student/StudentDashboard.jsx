@@ -16,8 +16,11 @@ export default function StudentDashboard() {
   const [fees, setFees] = useState([]);
   const [studentId] = useState("");
 
+  const [profile, setProfile] = useState(null);
+
   useEffect(() => {
-    fetch("http://localhost:8000/api/admin/my-dues", {
+    // 1. Fetch Dues
+    fetch("https://mess-management-system-q6us.onrender.com/api/admin/my-dues", {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`
       },
@@ -25,6 +28,20 @@ export default function StudentDashboard() {
       .then((res) => res.json())
       .then((data) => buildFeesList(data))
       .catch(console.error);
+
+    // 2. Fetch full Profile (for hostel attendance and check if inmate)
+    const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+    const admissionNo = user.username;
+    if (admissionNo) {
+       fetch(`https://mess-management-system-q6us.onrender.com/api/students/admission/${admissionNo}`, {
+         headers: {
+           Authorization: `Bearer ${sessionStorage.getItem("token")}`
+         }
+       })
+       .then(res => res.json())
+       .then(data => setProfile(data))
+       .catch(console.error);
+    }
   }, []);
 
   function buildFeesList(data) {
@@ -34,17 +51,30 @@ export default function StudentDashboard() {
       if (f.status === "paid") st = "paid";
       else st = "notpaid";
 
+      const sectionName = f.feeSection.name?.toLowerCase() || "";
+      let category = f.feeSection.category || "Academic";
+
+      // Priority categorization for HOD/Advisor/Library
+      if (
+        sectionName.includes("hod") || 
+        sectionName.includes("advisor") || 
+        sectionName.includes("library")
+      ) {
+        category = "Fine";
+      }
+
       return {
         id: f._id,
         type: f.feeSection.name,
-        cat: "Academic",
+        cat: category,
         amt: f.amount,
-        pub: "-",
-        due: "-",
+        pub: f.updatedAt ? new Date(f.updatedAt).toISOString().split("T")[0] : "-",
+        due: f.dueDate ? new Date(f.dueDate).toISOString().split("T")[0] : "-",
         status: st,
-        paidDate: "-",
+        paidDate: f.status === "paid" ? (f.updatedAt ? new Date(f.updatedAt).toISOString().split("T")[0] : "-") : "-",
         month: "Current",
         receiptUrl: null,
+        remark: f.remark || null,
       };
     });
 
@@ -72,6 +102,9 @@ export default function StudentDashboard() {
   };
 
   const handleConfirmPayment = (receiptData) => {
+    console.log(studentId);
+    console.log(modalData);
+    
     if (!studentId || !modalData) {
       setToastMsg(
         "Error: Not logged in properly. Please refresh and try again.",
@@ -141,7 +174,9 @@ export default function StudentDashboard() {
         }}
       />
       <FeeSection fees={fees} onPayNow={handlePayNow} />
-      <HostelSection />
+      {profile?.hostelName && (
+        <HostelSection attendance={profile.attendance} />
+      )}
       <ProfileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <PaymentModal
         modalData={modalData}

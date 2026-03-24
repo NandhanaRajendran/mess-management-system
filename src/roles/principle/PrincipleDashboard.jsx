@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 const PrincipalDashboard = () => {
 
   const [students, setStudents] = useState([]);
+  const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [semester,setSemester] = useState("");
   const [search, setSearch] = useState("");
@@ -15,12 +16,13 @@ const PrincipalDashboard = () => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8000/api/principal/students");
+        const response = await fetch("https://mess-management-system-q6us.onrender.com/api/principal/students");
         if (!response.ok) {
           throw new Error("Failed to fetch students");
         }
         const data = await response.json();
-        setStudents(data);
+        setStudents(data.students || []);
+        setColumns(data.columns || []);
       } catch (error) {
         console.error("Error fetching principal dashboard data:", error);
       } finally {
@@ -43,17 +45,7 @@ const PrincipalDashboard = () => {
   };
 
   const calculateTotal = (student) => {
-    return (
-      (student.PTA || 0) +
-      (student.Bus || 0) +
-      (student.HostelRent || 0) +
-      (student.HDF || 0) +
-      (student.Mess || 0) +
-      (student.Library || 0) +
-      (student.Lab || 0) +
-      (student.CDF || 0) +
-      (student.Accreditation || 0)
-    );
+    return columns.reduce((sum, col) => sum + (student[col] || 0), 0);
   };
 
   const handleLogout = () => {
@@ -137,15 +129,7 @@ const PrincipalDashboard = () => {
                 <th>Admission No</th>
                 <th>Name</th>
                 <th>Dept</th>
-                <th>PTA</th>
-                <th>Bus</th>
-                <th>Hostel Rent</th>
-                <th>HDF</th>
-                <th>Mess</th>
-                <th>Library</th>
-                <th>Lab</th>
-                <th>CDF</th>
-                <th>Accreditation</th>
+                {columns.map(c => <th key={c}>{c}</th>)}
                 <th>Total</th>
               </tr>
             </thead>
@@ -158,30 +142,18 @@ const PrincipalDashboard = () => {
 
                 return (
                   <tr key={index}>
-
                     <td>{student.admission}</td>
                     <td>{student.name}</td>
                     <td>{student.department}</td>
-
-                    <td>{renderCell(student.PTA)}</td>
-                    <td>{renderCell(student.Bus)}</td>
-                    <td>{renderCell(student.HostelRent)}</td>
-                    <td>{renderCell(student.HDF)}</td>
-                    <td>{renderCell(student.Mess)}</td>
-                    <td>{renderCell(student.Library)}</td>
-                    <td>{renderCell(student.Lab)}</td>
-                    <td>{renderCell(student.CDF)}</td>
-                    <td>{renderCell(student.Accreditation)}</td>
-
+                    {columns.map(c => <td key={c}>{renderCell(student[c])}</td>)}
                     <td className="total">
                       ₹{total.toLocaleString()}
                     </td>
-
                   </tr>
                 );
               }) : (
                  <tr>
-                    <td colSpan="13" style={{ textAlign: "center", padding: "2rem" }}>
+                   <td colSpan={columns.length + 4} style={{ textAlign: "center", padding: "2rem" }}>
                       {loading ? "Loading dues..." : "No dues found"}
                     </td>
                  </tr>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../styles/manual.css";
+import "./manual.css";
 import { useNavigate } from "react-router-dom";
 
 function ManualRent() {
@@ -23,7 +23,7 @@ function ManualRent() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/students/rent", {
+      const response = await fetch("https://mess-management-system-q6us.onrender.com/api/students/rent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: numAmount })

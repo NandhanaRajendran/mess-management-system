@@ -34,6 +34,7 @@ const dueSchema = new mongoose.Schema({
     },
     addedByRef: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: "Faculty",
         default: null
     },
 }, { timestamps: true });

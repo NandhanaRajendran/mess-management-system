@@ -25,7 +25,8 @@ const userSchema = new mongoose.Schema(
         "messManager",
         "principal",
         "feeManager",
-        "hostelManager"
+        "hostelManager",
+        "pta"
       ],
       required: true,
     },
@@ -46,7 +47,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// ✅ FIXED middleware (no next)
+
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
 

@@ -1,13 +1,39 @@
+import { useState, useEffect } from "react";
 import { Users, Building2, Receipt, UserCog, Plus, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function AdminDashboard() {
+  const [dashboardData, setDashboardData] = useState({
+    recentStudents: [],
+    recentDepartments: [],
+    stats: {
+      totalStudents: 0,
+      totalDepartments: 0,
+      totalStaffAdvisors: 0,
+      totalFeeSections: 0,
+    }
+  });
+
+  useEffect(() => {
+    fetch("https://mess-management-system-q6us.onrender.com/api/admin/dashboard-data", {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.stats) {
+          setDashboardData(data);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   const stats = [
-    { name: "Total Students", value: "10", icon: Users, link: "/admin/students", color: "blue" },
-    { name: "Total Departments", value: "6", icon: Building2, link: "/admin/departments", color: "green" },
-    { name: "Total Staff Advisors", value: "4", icon: UserCog, link: "/admin/staff", color: "purple" },
-    { name: "Total Fee Sections", value: "7", icon: Receipt, link: "/admin/fee-sections", color: "orange" },
+    { name: "Total Students", value: dashboardData.stats.totalStudents || "0", icon: Users, link: "/admin/students", color: "blue" },
+    { name: "Total Departments", value: dashboardData.stats.totalDepartments || "0", icon: Building2, link: "/admin/departments", color: "green" },
+    { name: "Total Staff Advisors", value: dashboardData.stats.totalStaffAdvisors || "0", icon: UserCog, link: "/admin/staff", color: "purple" },
+    { name: "Total Fee Sections", value: dashboardData.stats.totalFeeSections || "0", icon: Receipt, link: "/admin/fee-sections", color: "orange" },
   ];
 
   const quickActions = [
@@ -89,27 +115,16 @@ export default function AdminDashboard() {
           <h3>Recent Student Enrollments</h3>
 
           <ul>
-
-            <li>
-              Aarav Sharma
-              <span>Computer Science</span>
-            </li>
-
-            <li>
-              Diya Patel
-              <span>Electrical Engineering</span>
-            </li>
-
-            <li>
-              Rohan Gupta
-              <span>Civil Engineering</span>
-            </li>
-
-            <li>
-              Priya Reddy
-              <span>Electronics</span>
-            </li>
-
+            {dashboardData.recentStudents.length > 0 ? (
+              dashboardData.recentStudents.map((student) => (
+                <li key={student._id}>
+                  {student.name}
+                  <span>{student.department?.name || "N/A"}</span>
+                </li>
+              ))
+            ) : (
+              <li style={{ color: "gray", textAlign: "center", borderBottom: "none" }}>No recent students</li>
+            )}
           </ul>
 
           <Link to="/admin/students" className="view-btn">
@@ -124,22 +139,16 @@ export default function AdminDashboard() {
           <h3>Recent Department Updates</h3>
 
           <ul>
-
-            <li>
-              Computer Science
-              <span>New HOD appointed</span>
-            </li>
-
-            <li>
-              Information Technology
-              <span>Lab upgraded</span>
-            </li>
-
-            <li>
-              Mechanical Engineering
-              <span>Advisor added</span>
-            </li>
-
+            {dashboardData.recentDepartments.length > 0 ? (
+              dashboardData.recentDepartments.map((dept) => (
+                <li key={dept._id}>
+                  {dept.name}
+                  <span>Last updated: {new Date(dept.updatedAt).toLocaleDateString()}</span>
+                </li>
+              ))
+            ) : (
+              <li style={{ color: "gray", textAlign: "center", borderBottom: "none" }}>No recent updates</li>
+            )}
           </ul>
 
           <Link to="/admin/departments" className="view-btn">

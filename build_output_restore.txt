@@ -1,0 +1,28 @@
+
+> mess-sec@0.1.0 build
+> react-scripts build
+
+Creating an optimized production build...
+Compiled successfully.
+
+File sizes after gzip:
+
+  408.95 kB          build/static/js/main.371a12ae.js
+  46.35 kB           build/static/js/239.d4c1e52a.chunk.js
+  33.55 kB           build/static/js/732.012bf4f1.chunk.js
+  11.25 kB (-260 B)  build/static/css/main.697d5c3f.css
+  8.74 kB            build/static/js/977.b2ecc41f.chunk.js
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  npm install -g serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+

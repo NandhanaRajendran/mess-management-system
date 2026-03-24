@@ -13,6 +13,7 @@ const StaffAdvisorDashboard = () => {
   const user = userContext.profile || userContext;
 
   const [students, setStudents] = useState([]);
+  const [columns, setColumns] = useState([]);
   const [, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,17 +32,19 @@ const StaffAdvisorDashboard = () => {
       try {
         setLoading(true);
         // Assuming user object has department and className/batch
-        const dept = user?.department || userContext?.department || "Computer Science"; // Default to CS if empty for testing
+        // Use departmentId if available, fallback to name
+        const dept = user?.departmentId || user?.department || userContext?.department || "Computer Science";
         const batch = user?.className || user?.batch || userContext?.batch || "2021-25"; // Default if empty
         
-        const response = await fetch(`http://localhost:8000/api/staff-advisor/students?department=${dept}&batch=${batch}`);
+        const response = await fetch(`https://mess-management-system-q6us.onrender.com/api/staff-advisor/students?department=${dept}&batch=${batch}`);
         
         if (!response.ok) {
           throw new Error("Failed to fetch students");
         }
         
         const data = await response.json();
-        setStudents(data);
+        setStudents(data.students || []);
+        setColumns(data.columns || []);
       } catch (error) {
         console.error("Error fetching students:", error);
       } finally {
@@ -113,13 +116,7 @@ const StaffAdvisorDashboard = () => {
     );
   };
 
-  const feeColumns = [
-    { key: "Library", label: "Library" },
-    { key: "PTA",     label: "PTA"     },
-    { key: "HDF",     label: "HDF"     },
-    { key: "Rent",    label: "Rent"    },
-    { key: "Mess",    label: "Mess Fee"},
-  ];
+  const feeColumns = columns.map(c => ({ key: c, label: c }));
 
   const downloadCSV = () => {
     const pendingStudents = filteredStudents.filter(

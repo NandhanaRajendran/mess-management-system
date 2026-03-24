@@ -69,7 +69,7 @@ export default function AttendanceModal({ onClose }) {
   const MONTH_NAMES  = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
   return (
-    <div className="attendance-overlay">
+    <div className="mess-scope attendance-overlay">
       <div className="attendance-modal">
 
         {/* HEADER */}

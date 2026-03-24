@@ -151,6 +151,14 @@ const Icon = {
       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
   ),
+  Trash: () => (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      <line x1="10" y1="11" x2="10" y2="17"></line>
+      <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+  ),
 };
 
 /* ─── ADD FEE TAB ─── */
@@ -182,7 +190,7 @@ function AddFeeTab({ toast, feeSectionInfo }) {
       const params = new URLSearchParams();
       if (deptFilter) params.append("department", deptFilter);
       if (classFilter) params.append("className", classFilter);
-      const res = await fetch(`http://localhost:8000/api/fee-section/students?${params}`, {
+      const res = await fetch(`https://mess-management-system-q6us.onrender.com/api/fee-section/students?${params}`, {
         headers: authHeaders(),
       });
       const data = await res.json();
@@ -237,7 +245,7 @@ function AddFeeTab({ toast, feeSectionInfo }) {
         ...(mode === "manual" ? { admissionNos: selected } : { department: deptFilter, className: classFilter }),
       };
 
-      const res = await fetch("http://localhost:8000/api/fee-section/add-fee", {
+      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/fee-section/add-fee", {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify(body),
@@ -313,6 +321,30 @@ function AddFeeTab({ toast, feeSectionInfo }) {
         </FormGroup>
       </div>
 
+      {/* Action Button Area (Moved from bottom to near Remark field) */}
+      <div style={{ marginBottom: 28, display: "flex", flexDirection: "column", gap: 12, borderBottom: `1px solid ${C.sky50}`, pb: 20 }}>
+          {mode === "bulk" && (
+              <div style={{ background:C.amber100, borderRadius:8, padding:"12px 16px",
+                fontSize:".82rem", color:C.amber900, display:"flex", gap:8, width: "fit-content" }}>
+                ⚠️ This will add fee to <strong>&nbsp;all students&nbsp;</strong> matching the filters above.
+              </div>
+          )}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <Btn 
+                variant={mode === "bulk" ? "danger" : "primary"}
+                onClick={handleSubmit} 
+                style={{ opacity: submitting ? 0.7 : 1 }}
+              >
+                <Icon.Plus /> {submitting ? "Adding…" : mode === "manual" ? `Add Fee to ${selected.length} Student(s)` : "Add Fee in Bulk"}
+              </Btn>
+              {mode === "manual" && (
+                  <span style={{ fontSize:".82rem", color:C.slate500, fontWeight: 600 }}>
+                    {selected.length} student{selected.length !== 1 ? "s" : ""} selected for charging
+                  </span>
+              )}
+          </div>
+      </div>
+
       {/* Manual mode — student table */}
       {mode === "manual" && (
         <>
@@ -353,30 +385,7 @@ function AddFeeTab({ toast, feeSectionInfo }) {
             </TableWrap>
           )}
 
-          <div style={{ marginTop:16, display:"flex", alignItems:"center", gap:16 }}>
-            <span style={{ fontSize:".82rem", color:C.slate500 }}>
-              {selected.length} student{selected.length !== 1 ? "s" : ""} selected
-            </span>
-            <Btn onClick={handleSubmit} style={{ opacity: submitting ? 0.7 : 1 }}>
-              <Icon.Plus /> {submitting ? "Adding…" : `Add Fee to ${selected.length} Student(s)`}
-            </Btn>
-          </div>
         </>
-      )}
-
-      {/* Bulk mode */}
-      {mode === "bulk" && (
-        <div>
-          <div style={{ background:C.amber100, borderRadius:8, padding:"12px 16px",
-            fontSize:".82rem", color:C.amber900, marginBottom:16, display:"flex", gap:8 }}>
-            ⚠️ This will add fee to <strong>&nbsp;all students&nbsp;</strong>
-            matching the filters above. Students who already have a pending due
-            for this section will be skipped.
-          </div>
-          <Btn variant="danger" onClick={handleSubmit} style={{ opacity: submitting ? 0.7 : 1 }}>
-            {submitting ? "Adding…" : "Add Fee in Bulk"}
-          </Btn>
-        </div>
       )}
     </Card>
   );
@@ -409,7 +418,7 @@ function DueSheetTab({ toast, feeSectionInfo }) {
       if (classFilter) params.append("className", classFilter);
       if (statusFilter) params.append("status", statusFilter);
 
-      const res = await fetch(`http://localhost:8000/api/fee-section/due-sheet?${params}`, {
+      const res = await fetch(`https://mess-management-system-q6us.onrender.com/api/fee-section/due-sheet?${params}`, {
         headers: authHeaders(),
       });
       const data = await res.json();
@@ -419,6 +428,26 @@ function DueSheetTab({ toast, feeSectionInfo }) {
       toast("Failed to load due sheet", "error");
     }
     setLoading(false);
+  };
+
+  const handleDelete = async (dueId) => {
+    if (!window.confirm("Are you sure you want to delete this fee record?")) return;
+    try {
+      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/fee-section/delete-fee", {
+        method: "DELETE",
+        headers: authHeaders(),
+        body: JSON.stringify({ dueId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast(data.message, "success");
+        fetchDues();
+      } else {
+        toast(data.message || "Deletion failed", "error");
+      }
+    } catch (err) {
+      toast("Network error", "error");
+    }
   };
 
   useEffect(() => { fetchDues(); }, [deptFilter, classFilter, statusFilter]); // eslint-disable-line
@@ -526,11 +555,12 @@ function DueSheetTab({ toast, feeSectionInfo }) {
               <tr>
                 <Th>Adm No</Th><Th>Name</Th><Th>Department</Th>
                 <Th>Class</Th><Th>Amount</Th><Th>Due Date</Th><Th>Status</Th>
+                <Th>Actions</Th>
               </tr>
             </thead>
             <tbody>
               {filteredDues.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign:"center", padding:32, color:C.slate400 }}>
+                <tr><td colSpan={8} style={{ textAlign:"center", padding:32, color:C.slate400 }}>
                   No records found
                 </td></tr>
               ) : filteredDues.map((r, i) => (
@@ -544,6 +574,17 @@ function DueSheetTab({ toast, feeSectionInfo }) {
                   </Td>
                   <Td style={{ color:C.slate500, fontSize:".82rem" }}>{r.dueDate}</Td>
                   <Td><Badge status={r.status} /></Td>
+                  <Td>
+                    {r.status === "pending" && (
+                      <button 
+                        onClick={() => handleDelete(r._id)}
+                        style={{ background:"none", border:"none", color:C.red500, cursor:"pointer", padding:5, borderRadius:6, transition:".2s" }}
+                        title="Delete Fee"
+                      >
+                        <Icon.Trash />
+                      </button>
+                    )}
+                  </Td>
                 </tr>
               ))}
             </tbody>
@@ -599,7 +640,7 @@ export default function FeeSectionDashboard() {
   });
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/fee-section/info", { headers: authHeaders() })
+    fetch("https://mess-management-system-q6us.onrender.com/api/fee-section/info", { headers: authHeaders() })
       .then(res => res.json())
       .then(data => { setFeeSectionInfo(data); setLoading(false); })
       .catch(() => setLoading(false));

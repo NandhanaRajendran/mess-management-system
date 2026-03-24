@@ -12,11 +12,12 @@ function Enrollment() {
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
   const [semester, setSemester] = useState("");
+  const [gender, setGender] = useState("");
   const [isAutoFilled, setIsAutoFilled] = useState(false);
 
   // Fetch departments on mount
   useEffect(() => {
-    fetch("http://localhost:8000/api/admin/departments")
+    fetch("https://mess-management-system-q6us.onrender.com/api/admin/departments")
       .then(res => res.json())
       .then(data => setDepartments(Array.isArray(data) ? data : []))
       .catch(err => console.error("Error fetching departments:", err));
@@ -27,43 +28,55 @@ function Enrollment() {
     if (!id) return;
     
     setIsAutoFilled(false);
-    
-    if (category === "Student") {
-      try {
-        const res = await fetch(`http://localhost:8000/api/students/admission/${id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setName(data.name || "");
-          setDepartment(data.department?._id || data.department?.name || "");
-          setSemester(data.className || ""); // maps to semester
-          setIsAutoFilled(true);
-          setMessage("");
-        } else {
-          setName("");
-          setDepartment("");
-          setSemester("");
-          setMessage("Student not found in DB. Please enter details manually.");
+    setMessage("");
+
+    try {
+      // Always check if they are already in the hostel (Inmate collection)
+      const resInmate = await fetch(`https://mess-management-system-q6us.onrender.com/api/students/admission/${id}`);
+      if (resInmate.ok) {
+        const data = await resInmate.json();
+        if (data.hostelName) {
+           setMessage(`Error: ${data.name} is already enrolled in ${data.hostelName}.`);
+           setName("");
+           setDepartment("");
+           setSemester("");
+           setGender("");
+           return;
         }
-      } catch (err) {
-         console.error(err);
-      }
-    } else if (category === "Faculty") {
-      try {
-        const res = await fetch(`http://localhost:8000/api/admin/faculty/id/${id}`);
-        if (res.ok) {
-          const data = await res.json();
+        
+        // If they exist but ENROLLMENT isn't complete (no hostel), auto-fill for Student category
+        if (category === "Student") {
           setName(data.name || "");
           setDepartment(data.department?._id || data.department?.name || "");
+          setSemester(data.className || "");
+          setGender(data.gender || "Other");
           setIsAutoFilled(true);
-          setMessage("");
+          return;
+        }
+      }
+      
+      // If not in inmate collection or category is Faculty, check Faculty collection
+      if (category === "Faculty") {
+        const resFac = await fetch(`https://mess-management-system-q6us.onrender.com/api/admin/faculty/id/${id}`);
+        if (resFac.ok) {
+          const data = await resFac.json();
+          setName(data.name || "");
+          setDepartment(data.department?._id || data.department?.name || "");
+          setGender(""); // Faculty gender might not be in DB
+          setIsAutoFilled(true);
         } else {
           setName("");
           setDepartment("");
           setMessage("Faculty not found in DB. Please enter details manually.");
         }
-      } catch (err) {
-         console.error(err);
+      } else if (category === "Student") {
+        // We already tried Student fetch above and it failed if we are here
+        setName("");
+        setDepartment("");
+        setMessage("Student not found in DB. Please enter details manually.");
       }
+    } catch (err) {
+       console.error(err);
     }
   };
 
@@ -72,6 +85,7 @@ function Enrollment() {
     setName("");
     setDepartment("");
     setSemester("");
+    setGender("");
     setIsAutoFilled(false);
   };
 
@@ -88,7 +102,7 @@ function Enrollment() {
 
     try {
       // 1. Fetch current students to check room capacity
-      const resCount = await fetch("http://localhost:8000/api/students");
+      const resCount = await fetch("https://mess-management-system-q6us.onrender.com/api/students");
       const allStudents = await resCount.json();
       
       if (Array.isArray(allStudents)) {
@@ -110,15 +124,16 @@ function Enrollment() {
       const newInmate = {
         admission: finalAdmission,
         name: finalName,
-        hostelName: "", // Passed blank since it's temporarily disabled
         room: room,
         category: category,
         department: department,
-        className: semester
+        className: semester,
+        gender: gender,
+        hostelName: formData.get("hostelName") || ""
       };
 
       // 3. Enroll
-      const res = await fetch("http://localhost:8000/api/students/enroll-hostel", {
+      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/students/enroll-hostel", {
          method: "POST",
          headers: { "Content-Type": "application/json" },
          body: JSON.stringify(newInmate)
@@ -130,6 +145,7 @@ function Enrollment() {
         setName("");
         setDepartment("");
         setSemester("");
+        setGender("");
         setIsAutoFilled(false);
       } else {
         setMessage(`Error: ${data.message || "Failed to enroll student."}`);
@@ -184,6 +200,25 @@ function Enrollment() {
               required 
             />
 
+            {!isAutoFilled ? (
+              <select 
+                name="gender" 
+                value={gender} 
+                onChange={(e) => setGender(e.target.value)} 
+                required 
+                style={{ marginBottom: '15px' }}
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            ) : (
+              <div style={{ marginBottom: '15px', color: '#64748b', fontSize: '0.9rem' }}>
+                Gender: <strong>{gender}</strong>
+              </div>
+            )}
+
             {(category === "Student" || category === "Faculty" || category === "Supple Exam") && (
               <select 
                 name="department" 
@@ -219,14 +254,20 @@ function Enrollment() {
               </select>
             )}
 
-            {/* Temporarily commented out hostel selection to avoid complications 
-            <select name="hostelName" required style={{ marginBottom: '15px' }}>
-              <option value="">Select Hostel</option>
-              <option value="Kabani Ladies Hostel">Kabani Ladies Hostel</option>
-              <option value="Nila Ladies Hostel">Nila Ladies Hostel</option>
-              <option value="Mens Hostel">Mens Hostel</option>
-            </select>
-            */}
+            {gender === "Male" ? (
+              <p style={{ color: "#ef4444", fontSize: "0.85rem", marginBottom: "15px", fontWeight: "bold" }}>
+                No mens hostels are available now
+              </p>
+            ) : (
+              <select name="hostelName" required style={{ marginBottom: "15px" }}>
+                <option value="">Select Hostel</option>
+                <option value="Nila Ladies Hostel">Nila Ladies Hostel</option>
+                {/* Other hostels disabled for now
+                <option value="Kabani Ladies Hostel">Kabani Ladies Hostel</option>
+                <option value="Mens Hostel">Mens Hostel</option>
+                */}
+              </select>
+            )}
 
             <input
               name="enrollmentDate"

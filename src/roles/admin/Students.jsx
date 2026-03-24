@@ -11,7 +11,7 @@ import {
 import "../../styles/admin.css";
 
 
-const CLASSES = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8"];
+const CLASSES = ["S1", "S3", "S5", "S7"];
 const BATCHES = ["2025", "2024", "2023", "2022"];
 
 export default function Students() {
@@ -22,7 +22,7 @@ export default function Students() {
 
   //Fetch Students
   useEffect(() => {
-    fetch("http://localhost:8000/api/admin/all-students", {
+    fetch("https://mess-management-system-q6us.onrender.com/api/admin/all-students", {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
@@ -34,7 +34,7 @@ export default function Students() {
 
   //Fetch departments
   useEffect(() => {
-    fetch("http://localhost:8000/api/admin/departments")
+    fetch("https://mess-management-system-q6us.onrender.com/api/admin/departments")
       .then((res) => res.json())
       .then((data) => setDepartments(data))
       .catch(console.error);
@@ -45,12 +45,15 @@ export default function Students() {
   const [classFilter, setClassFilter] = useState("");
   const [filterPopup, setFilterPopup] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     admission: "",
     department: "",
     class: "",
     batch: "",
+    email: "",
+    gender: "Other",
   });
 
   const handleChange = (e) =>
@@ -75,8 +78,14 @@ export default function Students() {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/api/admin/add-student", {
-        method: "POST",
+      const isEdit = Boolean(editingStudent);
+      const url = isEdit
+        ? "https://mess-management-system-q6us.onrender.com/api/admin/update-student"
+        : "https://mess-management-system-q6us.onrender.com/api/admin/add-student";
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -87,7 +96,9 @@ export default function Students() {
           department: formData.department,
           className: formData.class,
           batch: formData.batch,
-          email: "test@gmail.com",
+          email: formData.email,
+          gender: formData.gender,
+          ...(isEdit && { originalAdmissionNo: editingStudent }),
         }),
       });
 
@@ -98,28 +109,39 @@ export default function Students() {
         return;
       }
 
-      if (!data.credentials) {
-        alert("Student created but credentials missing");
-        return;
+      if (isEdit) {
+        alert("Student Updated Successfully!");
+        setStudents((prev) =>
+          prev.map((s) => (s.admissionNo === editingStudent ? data.student : s))
+        );
+      } else {
+        if (!data.credentials) {
+          alert("Student created but credentials missing");
+          return;
+        }
+
+        alert(
+          `Student Created!\nUsername: ${data.credentials.username}\nPassword: ${data.credentials.password}`,
+        );
+
+        const resp = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/all-students", {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
+        });
+        const newData = await resp.json();
+        setStudents(newData);
       }
 
-      alert(
-        `Student Created!\nUsername: ${data.credentials.username}\nPassword: ${data.credentials.password}`,
-      );
-
-      // refresh UI
-      setStudents((prev) => [
-        ...prev,
-        {
-          name: formData.name,
-          admissionNo: formData.admission,
-          department: formData.department,
-          className: formData.class,
-          batch: formData.batch,
-        },
-      ]);
-
       setShowModal(false);
+      setEditingStudent(null);
+      setFormData({
+        name: "",
+        admission: "",
+        department: "",
+        class: "",
+        batch: "",
+        email: "",
+        gender: "Other",
+      });
     } catch (err) {
       alert("Server error");
     }
@@ -128,7 +150,7 @@ export default function Students() {
   const handleDelete = async (admissionNo) => {
     try {
       const res = await fetch(
-        "http://localhost:8000/api/admin/delete-student",
+        "https://mess-management-system-q6us.onrender.com/api/admin/delete-student",
         {
           method: "DELETE",
           headers: {
@@ -225,9 +247,11 @@ export default function Students() {
             <tr>
               <th>STUDENT NAME</th>
               <th>ADMISSION NUMBER</th>
+              <th>EMAIL</th>
               <th>DEPARTMENT</th>
               <th>BATCH</th>
               <th>CLASS</th>
+              <th>GENDER</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
@@ -250,11 +274,29 @@ export default function Students() {
                 <tr key={student._id}>
                   <td>{student.name}</td>
                   <td>{student.admissionNo}</td>
+                  <td>{student.email}</td>
                   <td>{student.department?.name}</td>
                   <td>{student.batch}</td>
                   <td>{student.className}</td>
+                  <td>{student.gender}</td>
                   <td className="actions">
-                    <Pencil size={16} className="action edit" />
+                    <Pencil 
+                      size={16} 
+                      className="action edit" 
+                      onClick={() => {
+                        setEditingStudent(student.admissionNo);
+                        setFormData({
+                          name: student.name,
+                          admission: student.admissionNo,
+                          department: student.department?._id || "",
+                          class: student.className || "",
+                          batch: student.batch || "",
+                          email: student.email || "",
+                          gender: student.gender || "Other",
+                        });
+                        setShowModal(true);
+                      }}
+                    />
                     <Trash2
                       size={16}
                       className="action delete"
@@ -357,8 +399,15 @@ export default function Students() {
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
-              <h3>Add New Student</h3>
-              <button className="close-btn" onClick={() => setShowModal(false)}>
+              <h3>{editingStudent ? "Edit Student" : "Add New Student"}</h3>
+              <button 
+                className="close-btn" 
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingStudent(null);
+                  setFormData({ name: "", admission: "", department: "", class: "", batch: "", email: "", gender: "Other" });
+                }}
+              >
                 <X size={18} />
               </button>
             </div>
@@ -368,44 +417,66 @@ export default function Students() {
                 name="name"
                 placeholder="Enter student name"
                 onChange={handleChange}
+                value={formData.name}
+                disabled={!!editingStudent}
               />
               <label>Admission Number</label>
               <input
                 name="admission"
                 placeholder="Enter admission number"
                 onChange={handleChange}
+                value={formData.admission}
+                disabled={!!editingStudent}
+              />
+              <label>Email ID</label>
+              <input
+                name="email"
+                type="email"
+                placeholder="Enter email address"
+                onChange={handleChange}
+                value={formData.email}
               />
               <label>Department</label>
-              <select name="department" onChange={handleChange}>
+              <select name="department" onChange={handleChange} value={formData.department}>
                 <option value="">Select department</option>
                 {departments.map((d) => (
                   <option key={d._id} value ={d._id} >{d.name}</option>
                 ))}
               </select>
               <label>Batch</label>
-              <select name="batch" onChange={handleChange}>
+              <select name="batch" onChange={handleChange} value={formData.batch} disabled={!!editingStudent}>
                 <option value="">Select batch</option>
                 {BATCHES.map((b) => (
                   <option key={b}>{b}</option>
                 ))}
               </select>
               <label>Class</label>
-              <select name="class" onChange={handleChange}>
+              <select name="class" onChange={handleChange} value={formData.class} disabled={!!editingStudent}>
                 <option value="">Select class</option>
                 {CLASSES.map((c) => (
                   <option key={c}>{c}</option>
                 ))}
               </select>
+              <label>Gender</label>
+              <select name="gender" onChange={handleChange} value={formData.gender} disabled={!!editingStudent}>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
             <div className="modal-footer">
               <button
                 className="cancel-btn"
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingStudent(null);
+                  setFormData({ name: "", admission: "", department: "", class: "", batch: "", email: "", gender: "Other" });
+                }}
               >
                 Cancel
               </button>
               <button className="submit-btn" onClick={handleAddStudent}>
-                Add Student
+                {editingStudent ? "Update Student" : "Add Student"}
               </button>
             </div>
           </div>

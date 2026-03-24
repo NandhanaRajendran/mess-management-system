@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 export function Navbar({ onAvatarClick }) {
   const navigate = useNavigate();
-  const profile = JSON.parse(sessionStorage.getItem("profile"));
+  const sessionUser = JSON.parse(sessionStorage.getItem("user") || "{}");
+  const profile = sessionUser.profile || sessionUser;
 
   const w = useWindowWidth();
   const isMobile = w < 640;

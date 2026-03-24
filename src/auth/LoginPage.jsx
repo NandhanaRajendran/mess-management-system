@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 export default function LoginPage() {
@@ -7,6 +7,20 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const userRef = useRef(null);
+  const passRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeys = (e) => {
+      // Space key to focus username (if not already focused or typing elsewhere)
+      if (e.code === "Space" && document.activeElement.tagName !== "INPUT") {
+        e.preventDefault();
+        userRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeys);
+    return () => window.removeEventListener("keydown", handleKeys);
+  }, []);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -15,7 +29,7 @@ export default function LoginPage() {
 
     try {
       console.log("Sending login request...");
-      const res = await fetch("http://localhost:8000/api/auth/login", {
+      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,9 +48,7 @@ export default function LoginPage() {
       console.log(data.user.role);
 
       // ✅ Save login info
-      sessionStorage.setItem("profile", JSON.stringify(data.user.profile));
-      sessionStorage.setItem("username", data.user.username);
-      sessionStorage.setItem("role", data.user.role);
+      sessionStorage.setItem("user", JSON.stringify(data.user));
       sessionStorage.setItem("token", data.token);
 
       // 🔥 Redirect based on role
@@ -65,6 +77,9 @@ export default function LoginPage() {
         case "hostelManager":
           navigate("/hostel/dashboard");
           break;
+        case "pta":
+          navigate("/pta/dashboard");
+          break;
         default:
           navigate("/");
       }
@@ -87,17 +102,30 @@ export default function LoginPage() {
         </div>
 
         <input
+          ref={userRef}
           type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              passRef.current?.focus();
+            }
+          }}
         />
 
         <input
+          ref={passRef}
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleLogin(e);
+            }
+          }}
         />
 
         <button className="btnFeatures" onClick={handleLogin}>

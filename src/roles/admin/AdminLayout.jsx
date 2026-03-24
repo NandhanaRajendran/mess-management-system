@@ -8,7 +8,7 @@ import { ProfileProvider, useProfile } from "../../context/ProfileContext";
 
 import {
   LayoutDashboard, Users, Building2, UserCog,
-  Receipt, Upload, Settings, Menu, X,
+  Receipt, Upload, Menu, X,
 } from "lucide-react";
 
 const navigation = [
@@ -18,7 +18,7 @@ const navigation = [
   { name: "Staff & Faculty", path: "/admin/staff",            icon: UserCog },
   { name: "Fee Sections",    path: "/admin/fee-sections",     icon: Receipt },
   { name: "Bulk Enrollment", path: "/admin/bulk-enrollment",  icon: Upload },
-  { name: "Settings",        path: "/admin/settings",         icon: Settings },
+  // { name: "Settings",        path: "/admin/settings",         icon: Settings },
 ];
 
 /* Inner layout — reads from ProfileContext */

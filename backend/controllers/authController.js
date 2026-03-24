@@ -7,7 +7,7 @@ const Faculty = require("../models/Faculty");
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, "i") } });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid username" });
@@ -59,7 +59,33 @@ exports.login = async (req, res) => {
 
     // 👨‍🏫 If faculty (HOD / advisor)
     if (user.role === "hod" || user.role === "staffAdvisor") {
-      profile = await Faculty.findById(user.refId).select("name facultyId");
+      const Faculty = require("../models/Faculty");
+      const Department = require("../models/Department");
+      const faculty = await Faculty.findById(user.refId).populate("department", "name");
+      
+      let deptInfo = faculty.department ? { id: faculty.department._id, name: faculty.department.name } : null;
+      let batch = null;
+
+      if (user.role === "hod") {
+        const hodDept = await Department.findOne({ hod: faculty._id });
+        if (hodDept) deptInfo = { id: hodDept._id, name: hodDept.name };
+      } else if (user.role === "staffAdvisor") {
+        const advDept = await Department.findOne({ "advisors.faculty": faculty._id });
+        if (advDept) {
+           deptInfo = { id: advDept._id, name: advDept.name };
+           const advEntry = advDept.advisors.find(a => a.faculty.toString() === faculty._id.toString());
+           batch = advEntry ? advEntry.className : null;
+        }
+      }
+
+      profile = {
+        name: faculty.name,
+        facultyId: faculty.facultyId,
+        departmentId: deptInfo ? deptInfo.id : null,
+        department: deptInfo ? deptInfo.name : null,
+        batch: batch,
+        className: batch
+      };
     }
 
     

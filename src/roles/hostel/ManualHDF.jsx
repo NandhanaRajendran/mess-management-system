@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../styles/manual.css";
+import "./manual.css";
 import { useNavigate } from "react-router-dom";
 
 function ManualHDF() {
@@ -24,7 +24,7 @@ function ManualHDF() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/students/hdf", {
+      const response = await fetch("https://mess-management-system-q6us.onrender.com/api/students/hdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: numAmount })
@@ -41,7 +41,7 @@ function ManualHDF() {
     }
   };
 
-  const displayMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const displayMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   return (
     <div className="manual-container" style={{ userSelect: 'none' }}>
@@ -59,7 +59,7 @@ function ManualHDF() {
 
         <h2 className="manual-title">Publish Monthly HDF</h2>
 
-        <select 
+        <select
           className="manual-input"
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}

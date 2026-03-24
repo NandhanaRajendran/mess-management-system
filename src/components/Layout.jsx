@@ -11,7 +11,7 @@ export default function Layout({ children }) {
   const closeMenu = () => setSidebarOpen(false);
 
   return (
-    <div className="layout">
+    <div className="mess-scope layout">
 
       <Sidebar isOpen={sidebarOpen} closeMenu={closeMenu} />
 

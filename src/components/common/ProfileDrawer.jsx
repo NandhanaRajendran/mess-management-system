@@ -8,11 +8,12 @@ export function ProfileDrawer({ open, onClose }) {
   const drawerW = w < 480 ? "100vw" : "360px";
   
   // Use DB data if logged in
-  const uDataStr = sessionStorage.getItem("profile");
-  let user = null;
+  const uDataStr = sessionStorage.getItem("user");
+  let sessionUser = null;
   if(uDataStr && uDataStr !== "undefined") {
-     user = JSON.parse(uDataStr);
+     sessionUser = JSON.parse(uDataStr);
   }
+  const user = sessionUser?.profile || sessionUser;
 
   const stuName = user?.name || "User";
   const initials = stuName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();

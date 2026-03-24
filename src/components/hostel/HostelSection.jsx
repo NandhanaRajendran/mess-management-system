@@ -5,7 +5,7 @@ import { useWindowWidth } from "../../hooks/useWindowWidth";
 import { ChevLeft, ChevRight } from "../icons";
 import { NavBtn } from "../common/NavBtn";
 
-export function HostelSection() {
+export function HostelSection({ attendance = [] }) {
   const [year, setYear] = useState(2025);
   const [month, setMonth] = useState(2); 
   const w = useWindowWidth();
@@ -21,7 +21,19 @@ export function HostelSection() {
     });
   };
 
-  const data = genAttendance(year, month);
+  // Process attendance from props
+  const data = {};
+  attendance.forEach(entry => {
+    const d = new Date(entry.date);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const day = d.getDate();
+      if (entry.present && !entry.messCut) data[day] = "present";
+      else if (entry.present && entry.messCut) data[day] = "messcut";
+      else if (!entry.present && !entry.messCut) data[day] = "absent";
+      else if (!entry.present && entry.messCut) data[day] = "absent-messcut";
+    }
+  });
+
   const days = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
   const vals = Object.values(data);

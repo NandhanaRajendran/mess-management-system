@@ -602,10 +602,10 @@ function FeeManagement({
   const handleDeleteFine = async (fineId) => {
     if (!window.confirm("Are you sure you want to delete this fine?")) return;
 
-    console.log("Deleting fine:", fineId); // ✅ add
+    console.log("Deleting fine:", fineId); 
 
     try {
-      const res = await fetch("http://localhost:8000/api/admin/delete-fine", {
+      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/delete-fine", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -614,9 +614,9 @@ function FeeManagement({
         body: JSON.stringify({ fineId }),
       });
 
-      console.log("Delete response status:", res.status); // ✅ add
+      console.log("Delete response status:", res.status); 
       const data = await res.json();
-      console.log("Delete response data:", data); // ✅ add
+      console.log("Delete response data:", data); 
 
       if (!res.ok) {
         toast(data.message || "Failed to delete fine", "error");
@@ -640,21 +640,22 @@ function FeeManagement({
       "Name",
       "Dept",
       "Semester",
-      "Category",
+      "Remarks / Category",
       "Amount",
       "Due Date",
       "Status",
-      "Action",
+      "Charged By",
     ];
     const tableRows = filteredFines.map((r) => [
       r.id,
       r.name,
       r.dept,
       r.sem,
-      r.cat,
+      r.remark || r.cat,
       r.amt,
       r.due,
       r.status,
+      r.addedByDept || "N/A",
     ]);
     autoTable(doc, {
       head: [tableColumn],
@@ -675,9 +676,9 @@ function FeeManagement({
 
   const generateFinesExcel = () => {
     let csv =
-      "data:text/csv;charset=utf-8,Adm No,Name,Dept,Semester,Category,Amount,Due Date,Status\n";
+      "data:text/csv;charset=utf-8,Adm No,Name,Dept,Semester,Remarks/Category,Amount,Due Date,Status,Charged By\n";
     filteredFines.forEach((r) => {
-      csv += `"${r.id}","${r.name}","${r.dept}","${r.sem}","${r.cat}","${r.amt}","${r.due}","${r.status}"\n`;
+      csv += `"${r.id}","${r.name}","${r.dept}","${r.sem}","${r.remark || r.cat}","${r.amt}","${r.due}","${r.status}","${r.addedByDept || "N/A"}"\n`;
     });
     const link = document.createElement("a");
     link.href = encodeURI(csv);
@@ -714,7 +715,7 @@ function FeeManagement({
         action: isApprove ? "approve" : "reject",
       };
 
-      const res = await fetch("http://localhost:8000/api/admin/approve-fine", {
+      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/approve-fine", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1374,17 +1375,19 @@ function FeeManagement({
               <Th>Name</Th>
               <Th>Dept</Th>
               <Th>Semester</Th>
-              <Th>Category</Th>
+              <Th>Remarks / Category</Th>
               <Th>Amount</Th>
               <Th>Due Date</Th>
               <Th>Status</Th>
+              <Th>Fine Charged By</Th>
+              <Th>Action</Th>
             </tr>
           </thead>
           <tbody>
             {filteredFines.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={10}
                   style={{
                     textAlign: "center",
                     padding: 32,
@@ -1405,7 +1408,7 @@ function FeeManagement({
                   <Td>
                     <Chip>{r.sem}</Chip>
                   </Td>
-                  <Td>{r.cat}</Td>
+                  <Td>{r.remark || r.cat}</Td>
                   <Td
                     style={{
                       fontWeight: 700,
@@ -1417,13 +1420,11 @@ function FeeManagement({
                   <Td style={{ color: C.slate500, fontSize: ".82rem" }}>
                     {r.due}
                   </Td>
-                  {/* // In fines table row — add a "Added By" indicator and
-                  conditional delete */}
-                  <Td style={{ fontSize: ".78rem", color: C.slate500 }}>
-                    {r.addedBy === "hod" ? "HOD Fine" : r.cat}
-                  </Td>
                   <Td>
                     <Badge status={r.status} />
+                  </Td>
+                  <Td style={{ fontSize: ".72rem", fontWeight: 600, color: C.slate500 }}>
+                    <Chip>{r.addedByDept || "N/A"}</Chip>
                   </Td>
                   <Td>
                     {/* ✅ only show delete if this HOD added it */}
@@ -1656,7 +1657,7 @@ function FeeCategories({ feeData, sems }) {
 /* ─────────────────────────────────────────────
    DUE SHEET TAB
 ───────────────────────────────────────────── */
-function DueSheet({ toast, dueData, sems }) {
+function DueSheet({ toast, dueData, dueSections, sems }) {
   const [sem, setSem] = useState("");
   const [feeType, setFeeType] = useState("all");
   const [admNo, setAdmNo] = useState("");
@@ -1681,11 +1682,11 @@ function DueSheet({ toast, dueData, sems }) {
   const clearCount = rows.length - withDue;
   const rate = rows.length ? Math.round((clearCount / rows.length) * 100) : 0;
 
-  const totalTuition = rows.reduce((a, r) => a + r.tuition, 0);
-  const totalExam = rows.reduce((a, r) => a + r.exam, 0);
-  const totalLibrary = rows.reduce((a, r) => a + r.library, 0);
-  const totalBus = rows.reduce((a, r) => a + r.bus, 0);
-  const totalFineAmt = rows.reduce((a, r) => a + r.fine, 0);
+  // Calculate dynamic totals for each section
+  const sectionTotals = {};
+  dueSections.forEach(section => {
+    sectionTotals[section] = rows.reduce((a, r) => a + (r[section] || 0), 0);
+  });
   const totalAllRows = rows.reduce((a, r) => a + r.total, 0);
 
   const fmt = (v) =>
@@ -1710,22 +1711,14 @@ function DueSheet({ toast, dueData, sems }) {
       "Adm No",
       "Name",
       "Semester",
-      "Tuition",
-      "Exam",
-      "Library",
-      "Bus",
-      "Fine",
+      ...dueSections,
       "Total Due",
     ];
     const tableRows = rows.map((r) => [
       r.id,
       r.name,
       r.sem,
-      `Rs. ${r.tuition}`,
-      `Rs. ${r.exam}`,
-      `Rs. ${r.library}`,
-      `Rs. ${r.bus}`,
-      `Rs. ${r.fine}`,
+      ...dueSections.map((s) => `Rs. ${r[s] || 0}`),
       `Rs. ${r.total}`,
     ]);
 
@@ -1749,10 +1742,10 @@ function DueSheet({ toast, dueData, sems }) {
   const generateDueExcel = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent +=
-      "Admission No,Name,Semester,Tuition,Exam,Library,Bus,Fine,Total Due\n";
+      `Admission No,Name,Semester,${dueSections.join(",")},Total Due\n`;
     rows.forEach((r) => {
-      // Wrap strings in quotes to prevent comma breaking inside names
-      csvContent += `"${r.id}","${r.name}","${r.sem}",${r.tuition},${r.exam},${r.library},${r.bus},${r.fine},${r.total}\n`;
+      const sectionVals = dueSections.map(s => r[s] || 0).join(",");
+      csvContent += `"${r.id}","${r.name}","${r.sem}",${sectionVals},${r.total}\n`;
     });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -1776,22 +1769,14 @@ function DueSheet({ toast, dueData, sems }) {
       "Adm No",
       "Name",
       "Semester",
-      "Tuition",
-      "Exam",
-      "Library",
-      "Bus",
-      "Fine",
+      ...dueSections,
       "Total Due",
     ];
     const tableRows = rows.map((r) => [
       r.id,
       r.name,
       r.sem,
-      `Rs. ${r.tuition}`,
-      `Rs. ${r.exam}`,
-      `Rs. ${r.library}`,
-      `Rs. ${r.bus}`,
-      `Rs. ${r.fine}`,
+      ...dueSections.map(s => `Rs. ${r[s] || 0}`),
       `Rs. ${r.total}`,
     ]);
     autoTable(doc, {
@@ -1882,11 +1867,9 @@ function DueSheet({ toast, dueData, sems }) {
         <FormGroup label="Filter by Fee Type">
           <Select value={feeType} onChange={(e) => setFeeType(e.target.value)}>
             <option value="all">All Fee Types</option>
-            <option value="tuition">Tuition Dues</option>
-            <option value="exam">Exam Dues</option>
-            <option value="library">Library Dues</option>
-            <option value="bus">Bus Dues</option>
-            <option value="fine">Fines Pending</option>
+            {dueSections.map(s => (
+              <option key={s} value={s}>{s} Dues</option>
+            ))}
           </Select>
         </FormGroup>
         <FormGroup label="Filter by Admission No">
@@ -1907,11 +1890,9 @@ function DueSheet({ toast, dueData, sems }) {
             <Th>Adm No</Th>
             <Th>Name</Th>
             <Th>Sem</Th>
-            <Th>Tuition</Th>
-            <Th>Exam</Th>
-            <Th>Library</Th>
-            <Th>Bus</Th>
-            <Th>Fine</Th>
+            {dueSections.map(s => (
+              <Th key={s}>{s}</Th>
+            ))}
             <Th>Total Due</Th>
           </tr>
         </thead>
@@ -1935,11 +1916,9 @@ function DueSheet({ toast, dueData, sems }) {
                 <Td>
                   <Chip>{r.sem}</Chip>
                 </Td>
-                <Td>{fmt(r.tuition)}</Td>
-                <Td>{fmt(r.exam)}</Td>
-                <Td>{fmt(r.library)}</Td>
-                <Td>{fmt(r.bus)}</Td>
-                <Td>{fmt(r.fine)}</Td>
+                {dueSections.map(s => (
+                  <Td key={s}>{fmt(r[s])}</Td>
+                ))}
                 <Td>
                   <strong style={{ color: r.total ? C.red500 : C.slate400 }}>
                     {r.total ? `₹${r.total.toLocaleString()}` : "—"}
@@ -1968,11 +1947,9 @@ function DueSheet({ toast, dueData, sems }) {
               >
                 Total:
               </Td>
-              <Td>{fmt(totalTuition)}</Td>
-              <Td>{fmt(totalExam)}</Td>
-              <Td>{fmt(totalLibrary)}</Td>
-              <Td>{fmt(totalBus)}</Td>
-              <Td>{fmt(totalFineAmt)}</Td>
+              {dueSections.map(s => (
+                <Td key={s}>{fmt(sectionTotals[s])}</Td>
+              ))}
               <Td>
                 <strong style={{ color: totalAllRows ? C.red500 : C.slate400 }}>
                   {totalAllRows ? `₹${totalAllRows.toLocaleString()}` : "—"}
@@ -2083,6 +2060,7 @@ export default function App() {
   const [toastVis, setToastVis] = useState(false);
   const [finesHistory, setFinesHistory] = useState([]);
   const [dueData, setDueData] = useState([]);
+  const [dueSections, setDueSections] = useState([]);
   const [, setStudents] = useState([]);
   const [feeData, setFeeData] = useState({ S2: [], S4: [], S6: [], S8: [] });
   const [deptName, setDeptName] = useState("");
@@ -2116,7 +2094,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    const BASE = "http://localhost:8000/api/admin";
+    const BASE = "https://mess-management-system-q6us.onrender.com/api/admin";
 
     const fetchAll = async () => {
       try {
@@ -2170,6 +2148,7 @@ export default function App() {
         if (sheetRes.ok) {
           const sheetJson = await sheetRes.json();
           setDueData(sheetJson.rows || []);
+          setDueSections(sheetJson.sections || []); // 🔥 add this
           const raw = sheetJson.feeData || {};
           setFeeData({
             S1: raw["S1"] || [],
@@ -2206,6 +2185,8 @@ export default function App() {
               rawId: d._id,
               addedByRef: d.addedByRef || null,
               addedBy: d.addedBy || null,
+              addedByDept: d.addedByDept || "N/A",
+              remark: d.remark || "",
             })),
           );
         }
@@ -2235,7 +2216,7 @@ export default function App() {
     }));
 
     try {
-      const res = await fetch("http://localhost:8000/api/admin/add-fine", {
+      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/add-fine", {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify(payload),
@@ -2452,6 +2433,7 @@ export default function App() {
               <DueSheet
                 toast={toast}
                 dueData={dueData}
+                dueSections={dueSections}
                 sems={sems} // ✅
               />
             )}

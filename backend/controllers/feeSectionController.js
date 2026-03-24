@@ -145,23 +145,9 @@ exports.addFeeToStudents = async (req, res) => {
       return res.status(400).json({ message: "No students found matching criteria" });
     }
 
-    // Check for existing dues to avoid duplicates
     const results = [];
-    let skipped = 0;
 
     for (const student of students) {
-      // Optional: skip if already has a pending due for same section
-      const existing = await Due.findOne({
-        student: student._id,
-        feeSection: feeSection._id,
-        status: "pending"
-      });
-
-      if (existing) {
-        skipped++;
-        continue;
-      }
-
       const due = await Due.create({
         student: student._id,
         feeSection: feeSection._id,
@@ -169,19 +155,43 @@ exports.addFeeToStudents = async (req, res) => {
         dueDate,
         status: "pending",
         remark: remark || "",
+        addedBy: "feeSection",
+        addedByRef: feeSection._id,
       });
 
       results.push(due);
     }
 
     res.status(201).json({
-      message: `Fee added to ${results.length} student(s). ${skipped} skipped (already have pending due).`,
+      message: `Fee added to ${results.length} student(s) successfully.`,
       count: results.length,
-      skipped,
     });
 
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Delete a due added by this fee section
+exports.deleteFee = async (req, res) => {
+  try {
+    const { dueId } = req.body;
+    const due = await Due.findById(dueId);
+    if (!due) return res.status(404).json({ message: "Record not found" });
+
+    // Ensure it belongs to this fee section
+    if (due.feeSection.toString() !== req.user.refId.toString()) {
+      return res.status(403).json({ message: "You can only delete fees from your own section" });
+    }
+
+    if (due.status === "paid") {
+      return res.status(400).json({ message: "Cannot delete a paid fee record" });
+    }
+
+    await Due.findByIdAndDelete(dueId);
+    res.json({ message: "Record deleted successfully" });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };

@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "../../styles/admin.css";
 
-const BASE = "http://localhost:8000/api/admin";
+const BASE = "https://mess-management-system-q6us.onrender.com/api/admin";
 
 const categoryColor = (cat) => {
   switch (cat) {
@@ -24,6 +24,8 @@ const categoryColor = (cat) => {
       return { bg: "#fce7f3", color: "#9d174d" };
     case "Hostel":
       return { bg: "#ede9fe", color: "#6d28d9" };
+    case "Fine":
+      return { bg: "#fee2e2", color: "#991b1b" };
     default:
       return { bg: "#f1f5f9", color: "#475569" };
   }
@@ -35,6 +37,7 @@ const CATEGORY_OPTIONS = [
   "Extra-curricular",
   "Transport",
   "Hostel",
+  "Fine",
 ];
 
 export default function FeeSections() {
@@ -236,11 +239,13 @@ export default function FeeSections() {
                     className="action edit"
                     onClick={() => openEdit(s)}
                   />
-                  <Trash2
-                    size={15}
-                    className="action delete"
-                    onClick={() => handleDelete(s._id)}
-                  />
+                  {s.name !== "Hostel Section" && s.name !== "Mess" && (
+                    <Trash2
+                      size={15}
+                      className="action delete"
+                      onClick={() => handleDelete(s._id)}
+                    />
+                  )}
                 </div>
               </div>
 
