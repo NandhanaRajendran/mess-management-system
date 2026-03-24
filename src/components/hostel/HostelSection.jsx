@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { C, HOSTEL_STATUS_CFG, MONTHS_LONG, shadow } from "../../utils/constants";
-import { genAttendance } from "../../utils/helpers";
 import { useWindowWidth } from "../../hooks/useWindowWidth";
 import { ChevLeft, ChevRight } from "../icons";
 import { NavBtn } from "../common/NavBtn";
