@@ -69,7 +69,7 @@ function AdminLayoutInner() {
             <div className="admin-info">
               {/* Reacts live to profile.fullName changes */}
               <p><b>{profile.fullName}</b></p>
-              <p>{profile.role}</p>
+              {/* <p>{profile.role}</p> */}
             </div>
           </div>
 

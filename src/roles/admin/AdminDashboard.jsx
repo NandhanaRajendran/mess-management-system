@@ -13,9 +13,12 @@ export default function AdminDashboard() {
       totalFeeSections: 0,
     }
   });
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
+
 
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/dashboard-data", {
+    fetch(`${API}/api/admin/dashboard-data`, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },

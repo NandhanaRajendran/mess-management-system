@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import "../../styles/admin.css";
 
-const BASE = "https://mess-management-system-q6us.onrender.com/api/admin";
+//const BASE = "https://mess-management-system-q6us.onrender.com/api/admin";
+const BASE = "http://localhost:8000/api/admin"
 
 const categoryColor = (cat) => {
   switch (cat) {

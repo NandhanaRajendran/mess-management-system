@@ -17,12 +17,12 @@ const BATCHES = ["2025", "2024", "2023", "2022"];
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [departments, setDepartments] = useState([]);
-
-
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
 
   //Fetch Students
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/all-students", {
+    fetch(`${API}/api/admin/all-students`, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
@@ -34,7 +34,7 @@ export default function Students() {
 
   //Fetch departments
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/departments")
+    fetch(`${API}/api/admin/departments`)
       .then((res) => res.json())
       .then((data) => setDepartments(data))
       .catch(console.error);
@@ -80,8 +80,8 @@ export default function Students() {
     try {
       const isEdit = Boolean(editingStudent);
       const url = isEdit
-        ? "https://mess-management-system-q6us.onrender.com/api/admin/update-student"
-        : "https://mess-management-system-q6us.onrender.com/api/admin/add-student";
+        ? `${API}/api/admin/update-student`
+        : `${API}/api/admin/add-student`;
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -124,7 +124,7 @@ export default function Students() {
           `Student Created!\nUsername: ${data.credentials.username}\nPassword: ${data.credentials.password}`,
         );
 
-        const resp = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/all-students", {
+        const resp = await fetch(`${API}/api/admin/all-students`, {
           headers: { Authorization: `Bearer ${sessionStorage.getItem("token")}` },
         });
         const newData = await resp.json();
@@ -150,7 +150,7 @@ export default function Students() {
   const handleDelete = async (admissionNo) => {
     try {
       const res = await fetch(
-        "https://mess-management-system-q6us.onrender.com/api/admin/delete-student",
+        `${API}/api/admin/delete-student`,
         {
           method: "DELETE",
           headers: {

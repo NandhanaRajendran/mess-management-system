@@ -4,7 +4,7 @@ const ProfileContext = createContext(null);
 
 export function ProfileProvider({ children }) {
   const [profile, setProfile] = useState({
-    fullName: "Admin Manager",
+    fullName: "Enrollment Admin",
     email: "admin@college.edu",
     role: "Student Enrollment Manager",
   });

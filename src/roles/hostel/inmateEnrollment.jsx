@@ -15,9 +15,12 @@ function Enrollment() {
   const [gender, setGender] = useState("");
   const [isAutoFilled, setIsAutoFilled] = useState(false);
 
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
+
   // Fetch departments on mount
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/departments")
+    fetch(`${API}/api/admin/departments`)
       .then(res => res.json())
       .then(data => setDepartments(Array.isArray(data) ? data : []))
       .catch(err => console.error("Error fetching departments:", err));
@@ -32,7 +35,7 @@ function Enrollment() {
 
     try {
       // Always check if they are already in the hostel (Inmate collection)
-      const resInmate = await fetch(`https://mess-management-system-q6us.onrender.com/api/students/admission/${id}`);
+      const resInmate = await fetch(`${API}/api/students/admission/${id}`);
       if (resInmate.ok) {
         const data = await resInmate.json();
         if (data.hostelName) {
@@ -57,7 +60,7 @@ function Enrollment() {
       
       // If not in inmate collection or category is Faculty, check Faculty collection
       if (category === "Faculty") {
-        const resFac = await fetch(`https://mess-management-system-q6us.onrender.com/api/admin/faculty/id/${id}`);
+        const resFac = await fetch(`${API}/api/admin/faculty/id/${id}`);
         if (resFac.ok) {
           const data = await resFac.json();
           setName(data.name || "");
@@ -102,7 +105,7 @@ function Enrollment() {
 
     try {
       // 1. Fetch current students to check room capacity
-      const resCount = await fetch("https://mess-management-system-q6us.onrender.com/api/students");
+      const resCount = await fetch(`${API}/api/students`);
       const allStudents = await resCount.json();
       
       if (Array.isArray(allStudents)) {
@@ -133,7 +136,7 @@ function Enrollment() {
       };
 
       // 3. Enroll
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/students/enroll-hostel", {
+      const res = await fetch(`${API}/api/students/enroll-hostel`, {
          method: "POST",
          headers: { "Content-Type": "application/json" },
          body: JSON.stringify(newInmate)

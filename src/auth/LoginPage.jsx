@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const userRef = useRef(null);
   const passRef = useRef(null);
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
 
   useEffect(() => {
     const handleKeys = (e) => {
@@ -29,7 +31,15 @@ export default function LoginPage() {
 
     try {
       console.log("Sending login request...");
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/auth/login", {
+      // const res = await fetch("https://mess-management-system-q6us.onrender.com/api/auth/login", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ username, password }),
+      // });
+
+      const res = await fetch(`${API}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

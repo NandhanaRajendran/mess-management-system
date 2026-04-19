@@ -16,8 +16,11 @@ function HostelDashboard() {
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
+
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/students")
+    fetch(`${API}/api/students`)
       .then(res => res.json())
       .then(data => setAllStudents(Array.isArray(data) ? data : []))
       .catch(err => console.error(err));
@@ -88,7 +91,7 @@ function HostelDashboard() {
   const handleUnenroll = async (admissionNo) => {
     if (!window.confirm(`Are you sure you want to unenroll student ${admissionNo}?`)) return;
     try {
-      const res = await fetch(`https://mess-management-system-q6us.onrender.com/api/students/unenroll/${admissionNo}`, { method: "DELETE" });
+      const res = await fetch(`${API}/api/students/unenroll/${admissionNo}`, { method: "DELETE" });
       if (res.ok) {
         setAllStudents(prev => prev.filter(s => s.admissionNo !== admissionNo));
       } else {

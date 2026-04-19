@@ -21,9 +21,11 @@ export default function Departments() {
   const [editingDept, setEditingDept] = useState(null);
   const [hodCredentials, setHodCredentials] = useState({});
   const [advisorCredentials, setAdvisorCredentials] = useState({});
+  const API = "http://localhost:8000";
+//const API = "https://mess-management-system-q6us.onrender.com"; // ← uncomment for production
 
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/departments")
+    fetch(`${API}/api/admin/departments`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Departments from DB:", data);
@@ -33,7 +35,7 @@ export default function Departments() {
   }, []);
 
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/faculty")
+    fetch(`${API}/api/admin/faculty`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Faculty from DB:", data);
@@ -94,7 +96,7 @@ export default function Departments() {
     // persist to DB
     try {
       const res = await fetch(
-        "https://mess-management-system-q6us.onrender.com/api/admin/update-department",
+        `${API}/api/admin/update-department`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -114,7 +116,7 @@ export default function Departments() {
   /* ── Assign HOD ── */
   const assignHod = async (deptId, facultyId) => {
     try {
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/assign-hod", {
+      const res = await fetch(`${API}/api/admin/assign-hod`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ departmentId: deptId, facultyId }),
@@ -148,7 +150,7 @@ export default function Departments() {
   const assignAdvisor = async (deptId, sem, facultyId) => {
     try {
       const res = await fetch(
-        "https://mess-management-system-q6us.onrender.com/api/admin/assign-advisor",
+        `${API}/api/admin/assign-advisor`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -204,8 +206,8 @@ export default function Departments() {
 
     try {
       const url = editingDept
-        ? "https://mess-management-system-q6us.onrender.com/api/admin/update-department"
-        : "https://mess-management-system-q6us.onrender.com/api/admin/add-department";
+        ? `${API}/api/admin/update-department`
+        : `${API}/api/admin/add-department`;
 
       const body = editingDept
         ? { departmentId: editingDept._id, name: formData.name }

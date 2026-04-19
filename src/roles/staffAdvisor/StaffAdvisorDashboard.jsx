@@ -20,6 +20,9 @@ const StaffAdvisorDashboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: "name", direction: "asc" });
   const [selectedFee] = useState("All");
   const [activeTab, setActiveTab] = useState("overview");
+
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
   
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -36,7 +39,7 @@ const StaffAdvisorDashboard = () => {
         const dept = user?.departmentId || user?.department || userContext?.department || "Computer Science";
         const batch = user?.className || user?.batch || userContext?.batch || "2021-25"; // Default if empty
         
-        const response = await fetch(`https://mess-management-system-q6us.onrender.com/api/staff-advisor/students?department=${dept}&batch=${batch}`);
+        const response = await fetch(`${API}/api/staff-advisor/students?department=${dept}&batch=${batch}`);
         
         if (!response.ok) {
           throw new Error("Failed to fetch students");

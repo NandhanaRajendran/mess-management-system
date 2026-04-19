@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/manual.css";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+//const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
 
 function PublishHDF() {
 
@@ -13,7 +15,7 @@ function PublishHDF() {
   const [selectedYear, setSelectedYear] = useState("2024");
 
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/students")
+    fetch(`${API}/api/students`)
       .then(res => res.json())
       .then(data => {
         const studentArray = Array.isArray(data) ? data : [];

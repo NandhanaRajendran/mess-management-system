@@ -9,6 +9,8 @@ function ManualHDF() {
   // ✅ store properly
   const [amount, setAmount] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("June");
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
 
   const handlePublish = async () => {
     const numAmount = Number(amount);
@@ -24,7 +26,7 @@ function ManualHDF() {
     }
 
     try {
-      const response = await fetch("https://mess-management-system-q6us.onrender.com/api/students/hdf", {
+      const response = await fetch(`${API}/api/students/hdf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: numAmount })

@@ -17,10 +17,12 @@ export default function StudentDashboard() {
   const [studentId] = useState("");
 
   const [profile, setProfile] = useState(null);
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
 
   useEffect(() => {
     // 1. Fetch Dues
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/my-dues", {
+    fetch(`${API}/api/admin/my-dues`, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`
       },
@@ -33,7 +35,7 @@ export default function StudentDashboard() {
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
     const admissionNo = user.username;
     if (admissionNo) {
-       fetch(`https://mess-management-system-q6us.onrender.com/api/students/admission/${admissionNo}`, {
+       fetch(`${API}/api/students/admission/${admissionNo}`, {
          headers: {
            Authorization: `Bearer ${sessionStorage.getItem("token")}`
          }

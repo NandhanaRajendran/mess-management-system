@@ -161,6 +161,8 @@ const Icon = {
   ),
 };
 
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
 /* ─── ADD FEE TAB ─── */
 function AddFeeTab({ toast, feeSectionInfo }) {
   const [mode, setMode] = useState("manual");
@@ -178,6 +180,8 @@ function AddFeeTab({ toast, feeSectionInfo }) {
   const departments = feeSectionInfo?.applicableDepartments || [];
   const classes = ["S1","S2","S3","S4","S5","S6","S7","S8"];
 
+
+
   const authHeaders = () => ({
     "Content-Type": "application/json",
     Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -190,7 +194,7 @@ function AddFeeTab({ toast, feeSectionInfo }) {
       const params = new URLSearchParams();
       if (deptFilter) params.append("department", deptFilter);
       if (classFilter) params.append("className", classFilter);
-      const res = await fetch(`https://mess-management-system-q6us.onrender.com/api/fee-section/students?${params}`, {
+      const res = await fetch(`${API}/api/fee-section/students?${params}`, {
         headers: authHeaders(),
       });
       const data = await res.json();
@@ -245,7 +249,7 @@ function AddFeeTab({ toast, feeSectionInfo }) {
         ...(mode === "manual" ? { admissionNos: selected } : { department: deptFilter, className: classFilter }),
       };
 
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/fee-section/add-fee", {
+      const res = await fetch(`${API}/api/fee-section/add-fee`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify(body),
@@ -418,7 +422,7 @@ function DueSheetTab({ toast, feeSectionInfo }) {
       if (classFilter) params.append("className", classFilter);
       if (statusFilter) params.append("status", statusFilter);
 
-      const res = await fetch(`https://mess-management-system-q6us.onrender.com/api/fee-section/due-sheet?${params}`, {
+      const res = await fetch(`${API}/api/fee-section/due-sheet?${params}`, {
         headers: authHeaders(),
       });
       const data = await res.json();
@@ -433,7 +437,7 @@ function DueSheetTab({ toast, feeSectionInfo }) {
   const handleDelete = async (dueId) => {
     if (!window.confirm("Are you sure you want to delete this fee record?")) return;
     try {
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/fee-section/delete-fee", {
+      const res = await fetch(`${API}/api/fee-section/delete-fee`, {
         method: "DELETE",
         headers: authHeaders(),
         body: JSON.stringify({ dueId }),
@@ -640,7 +644,7 @@ export default function FeeSectionDashboard() {
   });
 
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/fee-section/info", { headers: authHeaders() })
+    fetch(`${API}/api/fee-section/info`, { headers: authHeaders() })
       .then(res => res.json())
       .then(data => { setFeeSectionInfo(data); setLoading(false); })
       .catch(() => setLoading(false));

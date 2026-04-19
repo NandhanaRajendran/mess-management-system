@@ -19,10 +19,10 @@ export default function Header({ toggleMenu }) {
 
       {/* Profile Section */}
       <div className="profile-section">
-        <div className="avatar-circle">NR</div>
+        <div className="avatar-circle">MS</div>
         <div>
-          <p className="header-name">Nandhana</p>
-          <p className="header-role">Mess Manager</p>
+          {/* <p className="header-name">Nandhana</p> */}
+          <p className="header-role">Mess Secretary</p>
         </div>
       </div>
 

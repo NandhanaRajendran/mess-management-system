@@ -11,12 +11,14 @@ const PrincipalDashboard = () => {
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("");
   const navigate = useNavigate();
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const response = await fetch("https://mess-management-system-q6us.onrender.com/api/principal/students");
+        const response = await fetch(`${API}/api/principal/students`);
         if (!response.ok) {
           throw new Error("Failed to fetch students");
         }

@@ -18,8 +18,11 @@ export default function Staff() {
     phone: "",
   });
 
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
+
   const fetchFaculty = () => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/faculty", {
+    fetch(`${API}/api/admin/faculty`, {
       headers: {
         Authorization: `Bearer ${sessionStorage.getItem("token")}`,
       },
@@ -39,7 +42,7 @@ export default function Staff() {
 
   // ✅ FETCH DEPARTMENTS
   useEffect(() => {
-    fetch("https://mess-management-system-q6us.onrender.com/api/admin/departments")
+    fetch(`${API}/api/admin/departments`)
       .then((res) => res.json())
       .then((data) => setDepartments(data))
       .catch(console.error);
@@ -65,7 +68,7 @@ export default function Staff() {
       console.log(f);
       
       const res = await fetch(
-        "https://mess-management-system-q6us.onrender.com/api/admin/delete-faculty",
+        `${API}/api/admin/delete-faculty`,
         {
           method: "POST",
           headers: {
@@ -108,7 +111,7 @@ export default function Staff() {
         (d) => d.name === formData.department,
       );
 
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/add-faculty", {
+      const res = await fetch(`${API}/api/admin/add-faculty`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -567,6 +567,9 @@ function Modal({ open, title, onClose, children, footer }) {
   );
 }
 
+  //const API = "https://mess-management-system-q6us.onrender.com"
+  const API = "http://localhost:8000"
+
 /* ─────────────────────────────────────────────
    FEE MANAGEMENT TAB
 ───────────────────────────────────────────── */
@@ -599,13 +602,14 @@ function FeeManagement({
   const [finesSearch, setFinesSearch] = useState("");
   const [finesExportModal, setFinesExportModal] = useState(false);
 
+
   const handleDeleteFine = async (fineId) => {
     if (!window.confirm("Are you sure you want to delete this fine?")) return;
 
     console.log("Deleting fine:", fineId); 
 
     try {
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/delete-fine", {
+      const res = await fetch(`${API}/api/admin/delete-fine`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -715,7 +719,7 @@ function FeeManagement({
         action: isApprove ? "approve" : "reject",
       };
 
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/approve-fine", {
+      const res = await fetch(`${API}/api/admin/approve-fine`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2094,7 +2098,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    const BASE = "https://mess-management-system-q6us.onrender.com/api/admin";
+    const BASE = `${API}/api/admin`;
 
     const fetchAll = async () => {
       try {
@@ -2216,7 +2220,7 @@ export default function App() {
     }));
 
     try {
-      const res = await fetch("https://mess-management-system-q6us.onrender.com/api/admin/add-fine", {
+      const res = await fetch(`${API}/api/admin/add-fine`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify(payload),
