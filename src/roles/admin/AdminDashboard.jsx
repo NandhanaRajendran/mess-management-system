@@ -13,8 +13,8 @@ export default function AdminDashboard() {
       totalFeeSections: 0,
     }
   });
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
 
   useEffect(() => {

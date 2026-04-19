@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../../styles/manual.css";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-//const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+const API = "https://mess-management-system-q6us.onrender.com"
+//const API = "http://localhost:8000"
 
 function PublishHDF() {
 

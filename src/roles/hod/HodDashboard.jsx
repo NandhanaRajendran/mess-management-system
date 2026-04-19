@@ -567,8 +567,8 @@ function Modal({ open, title, onClose, children, footer }) {
   );
 }
 
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+const API = "https://mess-management-system-q6us.onrender.com"
+//const API = "http://localhost:8000"
 
 /* ─────────────────────────────────────────────
    FEE MANAGEMENT TAB
@@ -606,7 +606,7 @@ function FeeManagement({
   const handleDeleteFine = async (fineId) => {
     if (!window.confirm("Are you sure you want to delete this fine?")) return;
 
-    console.log("Deleting fine:", fineId); 
+    console.log("Deleting fine:", fineId);
 
     try {
       const res = await fetch(`${API}/api/admin/delete-fine`, {
@@ -618,9 +618,9 @@ function FeeManagement({
         body: JSON.stringify({ fineId }),
       });
 
-      console.log("Delete response status:", res.status); 
+      console.log("Delete response status:", res.status);
       const data = await res.json();
-      console.log("Delete response data:", data); 
+      console.log("Delete response data:", data);
 
       if (!res.ok) {
         toast(data.message || "Failed to delete fine", "error");

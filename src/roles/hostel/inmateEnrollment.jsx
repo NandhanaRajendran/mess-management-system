@@ -15,8 +15,8 @@ function Enrollment() {
   const [gender, setGender] = useState("");
   const [isAutoFilled, setIsAutoFilled] = useState(false);
 
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   // Fetch departments on mount
   useEffect(() => {
@@ -29,7 +29,7 @@ function Enrollment() {
   const handleIdBlur = async (e) => {
     const id = e.target.value.trim();
     if (!id) return;
-    
+
     setIsAutoFilled(false);
     setMessage("");
 
@@ -39,14 +39,14 @@ function Enrollment() {
       if (resInmate.ok) {
         const data = await resInmate.json();
         if (data.hostelName) {
-           setMessage(`Error: ${data.name} is already enrolled in ${data.hostelName}.`);
-           setName("");
-           setDepartment("");
-           setSemester("");
-           setGender("");
-           return;
+          setMessage(`Error: ${data.name} is already enrolled in ${data.hostelName}.`);
+          setName("");
+          setDepartment("");
+          setSemester("");
+          setGender("");
+          return;
         }
-        
+
         // If they exist but ENROLLMENT isn't complete (no hostel), auto-fill for Student category
         if (category === "Student") {
           setName(data.name || "");
@@ -57,7 +57,7 @@ function Enrollment() {
           return;
         }
       }
-      
+
       // If not in inmate collection or category is Faculty, check Faculty collection
       if (category === "Faculty") {
         const resFac = await fetch(`${API}/api/admin/faculty/id/${id}`);
@@ -79,7 +79,7 @@ function Enrollment() {
         setMessage("Student not found in DB. Please enter details manually.");
       }
     } catch (err) {
-       console.error(err);
+      console.error(err);
     }
   };
 
@@ -107,13 +107,13 @@ function Enrollment() {
       // 1. Fetch current students to check room capacity
       const resCount = await fetch(`${API}/api/students`);
       const allStudents = await resCount.json();
-      
+
       if (Array.isArray(allStudents)) {
-        const inRoom = allStudents.filter(s => 
+        const inRoom = allStudents.filter(s =>
           String(s.room) === String(room)
           // Intentionally omitted hostelName capacity check since it's temporarily disabled
         );
-        
+
         if (inRoom.length >= 4) {
           setMessage("Error: Maximum 4 people allowed in this room.");
           return;
@@ -137,9 +137,9 @@ function Enrollment() {
 
       // 3. Enroll
       const res = await fetch(`${API}/api/students/enroll-hostel`, {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify(newInmate)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newInmate)
       });
       const data = await res.json();
       if (res.ok) {
@@ -177,14 +177,14 @@ function Enrollment() {
 
           <form onSubmit={handleSubmit}>
             {(category === "Student" || category === "Faculty" || category === "Supple Exam") && (
-              <input 
-                name="admission" 
+              <input
+                name="admission"
                 placeholder={category === "Faculty" ? "Faculty ID" : "Admission Number"}
                 onBlur={handleIdBlur}
-                required 
+                required
               />
             )}
-            
+
             <select name="category" value={category} onChange={handleCategoryChange} required style={{ marginBottom: '15px' }}>
               <option value="Inmate type">Inmate type</option>
               <option value="Student">Student</option>
@@ -194,21 +194,21 @@ function Enrollment() {
               <option value="Supple Exam">Supplementary Exam</option>
             </select>
 
-            <input 
-              name="name" 
-              placeholder="Name" 
+            <input
+              name="name"
+              placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               readOnly={isAutoFilled}
-              required 
+              required
             />
 
             {!isAutoFilled ? (
-              <select 
-                name="gender" 
-                value={gender} 
-                onChange={(e) => setGender(e.target.value)} 
-                required 
+              <select
+                name="gender"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                required
                 style={{ marginBottom: '15px' }}
               >
                 <option value="">Select Gender</option>
@@ -223,8 +223,8 @@ function Enrollment() {
             )}
 
             {(category === "Student" || category === "Faculty" || category === "Supple Exam") && (
-              <select 
-                name="department" 
+              <select
+                name="department"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
                 disabled={isAutoFilled}
@@ -238,8 +238,8 @@ function Enrollment() {
             )}
 
             {category === "Student" && (
-              <select 
-                name="semester" 
+              <select
+                name="semester"
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
                 disabled={isAutoFilled}

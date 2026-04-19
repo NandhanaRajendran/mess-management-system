@@ -17,8 +17,8 @@ export default function StudentDashboard() {
   const [studentId] = useState("");
 
   const [profile, setProfile] = useState(null);
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   useEffect(() => {
     // 1. Fetch Dues
@@ -35,14 +35,14 @@ export default function StudentDashboard() {
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
     const admissionNo = user.username;
     if (admissionNo) {
-       fetch(`${API}/api/students/admission/${admissionNo}`, {
-         headers: {
-           Authorization: `Bearer ${sessionStorage.getItem("token")}`
-         }
-       })
-       .then(res => res.json())
-       .then(data => setProfile(data))
-       .catch(console.error);
+      fetch(`${API}/api/students/admission/${admissionNo}`, {
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("token")}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => setProfile(data))
+        .catch(console.error);
     }
   }, []);
 
@@ -58,8 +58,8 @@ export default function StudentDashboard() {
 
       // Priority categorization for HOD/Advisor/Library
       if (
-        sectionName.includes("hod") || 
-        sectionName.includes("advisor") || 
+        sectionName.includes("hod") ||
+        sectionName.includes("advisor") ||
         sectionName.includes("library")
       ) {
         category = "Fine";
@@ -106,7 +106,7 @@ export default function StudentDashboard() {
   const handleConfirmPayment = (receiptData) => {
     console.log(studentId);
     console.log(modalData);
-    
+
     if (!studentId || !modalData) {
       setToastMsg(
         "Error: Not logged in properly. Please refresh and try again.",

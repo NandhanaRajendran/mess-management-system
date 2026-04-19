@@ -9,8 +9,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const userRef = useRef(null);
   const passRef = useRef(null);
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   useEffect(() => {
     const handleKeys = (e) => {

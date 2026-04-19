@@ -8,8 +8,8 @@ function ManualRent() {
 
   const [amount, setAmount] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("June");
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   const handlePublish = async () => {
     const numAmount = Number(amount);
@@ -42,7 +42,7 @@ function ManualRent() {
     }
   };
 
-  const displayMonths = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const displayMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
   return (
     <div className="manual-container" style={{ userSelect: 'none' }}>
@@ -60,7 +60,7 @@ function ManualRent() {
 
         <h2 className="manual-title">Publish Monthly Rent</h2>
 
-        <select 
+        <select
           className="manual-input"
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}

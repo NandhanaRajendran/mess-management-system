@@ -16,8 +16,8 @@ function HostelDashboard() {
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   useEffect(() => {
     fetch(`${API}/api/students`)
@@ -31,8 +31,8 @@ function HostelDashboard() {
 
     // Global filters
     if (searchQuery) {
-      filtered = filtered.filter(s => 
-        String(s.admissionNo).includes(searchQuery) || 
+      filtered = filtered.filter(s =>
+        String(s.admissionNo).includes(searchQuery) ||
         s.name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
@@ -84,7 +84,7 @@ function HostelDashboard() {
     }
   }, [allStudents, hostel, feeType, searchQuery, year, activeTab]);
 
-  const mostRecentFeeDate = allStudents.length > 0 ? 
+  const mostRecentFeeDate = allStudents.length > 0 ?
     new Date(Math.max(...allStudents.map(s => s.feeUpdatedAt ? new Date(s.feeUpdatedAt) : 0))) : null;
   const isGracePeriod = mostRecentFeeDate ? (new Date() - mostRecentFeeDate) / (1000 * 60 * 60 * 24) < 10 : false;
 

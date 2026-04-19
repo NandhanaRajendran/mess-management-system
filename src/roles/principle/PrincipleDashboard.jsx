@@ -7,12 +7,12 @@ const PrincipalDashboard = () => {
   const [students, setStudents] = useState([]);
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [semester,setSemester] = useState("");
+  const [semester, setSemester] = useState("");
   const [search, setSearch] = useState("");
   const [dept, setDept] = useState("");
   const navigate = useNavigate();
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -154,11 +154,11 @@ const PrincipalDashboard = () => {
                   </tr>
                 );
               }) : (
-                 <tr>
-                   <td colSpan={columns.length + 4} style={{ textAlign: "center", padding: "2rem" }}>
-                      {loading ? "Loading dues..." : "No dues found"}
-                    </td>
-                 </tr>
+                <tr>
+                  <td colSpan={columns.length + 4} style={{ textAlign: "center", padding: "2rem" }}>
+                    {loading ? "Loading dues..." : "No dues found"}
+                  </td>
+                </tr>
               )}
 
             </tbody>

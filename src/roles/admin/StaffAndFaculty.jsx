@@ -18,8 +18,8 @@ export default function Staff() {
     phone: "",
   });
 
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   const fetchFaculty = () => {
     fetch(`${API}/api/admin/faculty`, {
@@ -66,7 +66,7 @@ export default function Staff() {
   const handleDelete = async (f) => {
     try {
       console.log(f);
-      
+
       const res = await fetch(
         `${API}/api/admin/delete-faculty`,
         {

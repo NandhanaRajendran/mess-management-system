@@ -17,8 +17,8 @@ const BATCHES = ["2025", "2024", "2023", "2022"];
 export default function Students() {
   const [students, setStudents] = useState([]);
   const [departments, setDepartments] = useState([]);
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   //Fetch Students
   useEffect(() => {
@@ -280,9 +280,9 @@ export default function Students() {
                   <td>{student.className}</td>
                   <td>{student.gender}</td>
                   <td className="actions">
-                    <Pencil 
-                      size={16} 
-                      className="action edit" 
+                    <Pencil
+                      size={16}
+                      className="action edit"
                       onClick={() => {
                         setEditingStudent(student.admissionNo);
                         setFormData({
@@ -400,8 +400,8 @@ export default function Students() {
           <div className="modal">
             <div className="modal-header">
               <h3>{editingStudent ? "Edit Student" : "Add New Student"}</h3>
-              <button 
-                className="close-btn" 
+              <button
+                className="close-btn"
                 onClick={() => {
                   setShowModal(false);
                   setEditingStudent(null);
@@ -440,7 +440,7 @@ export default function Students() {
               <select name="department" onChange={handleChange} value={formData.department}>
                 <option value="">Select department</option>
                 {departments.map((d) => (
-                  <option key={d._id} value ={d._id} >{d.name}</option>
+                  <option key={d._id} value={d._id} >{d.name}</option>
                 ))}
               </select>
               <label>Batch</label>

@@ -8,7 +8,7 @@ const StaffAdvisorDashboard = () => {
   const userContext = useMemo(() => {
     return JSON.parse(sessionStorage.getItem("user")) || {};
   }, []);
-  
+
   // Try to use the user directly or their profile
   const user = userContext.profile || userContext;
 
@@ -21,9 +21,9 @@ const StaffAdvisorDashboard = () => {
   const [selectedFee] = useState("All");
   const [activeTab, setActiveTab] = useState("overview");
 
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
-  
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
+
   const navigate = useNavigate();
   const handleLogout = () => {
     sessionStorage.removeItem("user");
@@ -38,13 +38,13 @@ const StaffAdvisorDashboard = () => {
         // Use departmentId if available, fallback to name
         const dept = user?.departmentId || user?.department || userContext?.department || "Computer Science";
         const batch = user?.className || user?.batch || userContext?.batch || "2021-25"; // Default if empty
-        
+
         const response = await fetch(`${API}/api/staff-advisor/students?department=${dept}&batch=${batch}`);
-        
+
         if (!response.ok) {
           throw new Error("Failed to fetch students");
         }
-        
+
         const data = await response.json();
         setStudents(data.students || []);
         setColumns(data.columns || []);
@@ -270,11 +270,10 @@ const StaffAdvisorDashboard = () => {
                       {activeTab === "dues" && <td><strong>₹{totalPending}</strong></td>}
                       <td>
                         <span
-                          className={`status-badge ${
-                            student.status?.toLowerCase() === "paid"
+                          className={`status-badge ${student.status?.toLowerCase() === "paid"
                               ? "status-paid"
                               : "status-pending"
-                          }`}
+                            }`}
                         >
                           {student.status}
                         </span>

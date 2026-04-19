@@ -9,8 +9,8 @@ function ManualHDF() {
   // ✅ store properly
   const [amount, setAmount] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("June");
-  //const API = "https://mess-management-system-q6us.onrender.com"
-  const API = "http://localhost:8000"
+  const API = "https://mess-management-system-q6us.onrender.com"
+  //const API = "http://localhost:8000"
 
   const handlePublish = async () => {
     const numAmount = Number(amount);
